@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
-import { ArrowLeft, ChevronLeft, ChevronRight, Download, FileText, Pencil, Upload, Trash2 } from "lucide-react";
+import { ArrowLeft, ChevronLeft, ChevronRight, Download, FileText, MapPin, Pencil, Upload, Trash2 } from "lucide-react";
 import { format } from "date-fns";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -61,6 +61,7 @@ const AdminSaleDetail = () => {
       upsertSale({
         id: sale.id,
         clientName: sale.clientName,
+        location: sale.location,
         surveyingDay: sale.surveyingDay,
         totalAmount: sale.totalAmount,
         paidAmount: sale.paidAmount,
@@ -78,6 +79,7 @@ const AdminSaleDetail = () => {
     upsertSale({
       id: sale.id,
       clientName: sale.clientName,
+      location: sale.location,
       surveyingDay: sale.surveyingDay,
       totalAmount: sale.totalAmount,
       paidAmount: sale.paidAmount,
@@ -100,6 +102,10 @@ const AdminSaleDetail = () => {
           <div className="text-xs uppercase tracking-wider text-muted-foreground mb-1">Client</div>
           <h1 className="font-serif text-3xl text-foreground">{sale.clientName}</h1>
           <p className="text-sm text-muted-foreground mt-1">Surveying day · {format(new Date(sale.surveyingDay), "EEEE, MMM d, yyyy")}</p>
+          <p className="text-sm text-muted-foreground mt-1 inline-flex items-start gap-1.5">
+            <MapPin className="h-4 w-4 mt-0.5 text-primary shrink-0" />
+            <span>{sale.location || <span className="italic opacity-70">Location not set</span>}</span>
+          </p>
         </div>
         <div className="flex items-center gap-3">
           <Badge variant="outline" className={
