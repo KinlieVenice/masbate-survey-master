@@ -1,10 +1,9 @@
-import { SiteLayout } from "@/components/site/SiteLayout";
 import { FileText, AlertCircle, CheckCircle, Shield, Wallet } from "lucide-react";
 
 const Terms = () => {
   return (
-    <SiteLayout>
-      <div className="container py-20 md:py-28">
+    <>
+      <section className="container pt-16 md:pt-24 pb-12">
         <div className="max-w-3xl mx-auto">
           <div className="text-center mb-12">
             <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-primary/10 mb-6">
