@@ -78,8 +78,20 @@ const AdminDashboard = () => {
       .sort((a, b) => +new Date(a.surveyingDay) - +new Date(b.surveyingDay));
   }, [sales]);
 
+  const activePresetLabel = useMemo(() => {
+    if (!range.from || !range.to) return null;
+    for (const p of PRESETS) {
+      const r = p.getRange();
+      if (
+        startOfDay(r.from).getTime() === startOfDay(range.from).getTime() &&
+        endOfDay(r.to).getTime() === endOfDay(range.to).getTime()
+      ) return p.label;
+    }
+    return null;
+  }, [range]);
+
   const rangeLabel = range.from
-    ? range.to && range.to.getTime() !== range.from.getTime()
+    ? range.to && startOfDay(range.to).getTime() !== startOfDay(range.from).getTime()
       ? `${format(range.from, "MMM d, yyyy")} – ${format(range.to, "MMM d, yyyy")}`
       : format(range.from, "MMM d, yyyy")
     : "Pick a range";
@@ -93,35 +105,46 @@ const AdminDashboard = () => {
         </div>
         <Popover>
           <PopoverTrigger asChild>
-            <Button variant="outline" className="gap-2 justify-start min-w-[260px]">
-              <CalendarIcon className="h-4 w-4" />
-              <span className="truncate">{rangeLabel}</span>
+            <Button variant="outline" className="gap-3 justify-start min-w-[260px] h-12 px-4">
+              <CalendarIcon className="h-4 w-4 text-primary shrink-0" />
+              <div className="flex flex-col items-start leading-tight">
+                <span className="text-[10px] uppercase tracking-wider text-muted-foreground">{activePresetLabel ?? "Custom range"}</span>
+                <span className="text-sm font-medium truncate">{rangeLabel}</span>
+              </div>
             </Button>
           </PopoverTrigger>
-          <PopoverContent className="w-auto p-0 flex flex-col sm:flex-row" align="end">
-            <div className="border-b sm:border-b-0 sm:border-r border-border p-2 flex sm:flex-col gap-1 overflow-x-auto sm:min-w-[140px]">
-              {PRESETS.map((p) => (
-                <button
-                  key={p.label}
-                  onClick={() => setRange(p.getRange())}
-                  className="text-left text-sm px-3 py-1.5 rounded-sm hover:bg-secondary text-foreground/80 hover:text-foreground whitespace-nowrap transition-colors"
-                >
-                  {p.label}
-                </button>
-              ))}
+          <PopoverContent className="w-auto p-0 max-w-[calc(100vw-2rem)]" align="end">
+            <div className="flex flex-col sm:flex-row">
+              <div className="border-b sm:border-b-0 sm:border-r border-border p-2 flex sm:flex-col gap-1 overflow-x-auto sm:overflow-visible sm:min-w-[150px] bg-muted/30">
+                <div className="hidden sm:block text-[10px] uppercase tracking-wider text-muted-foreground px-3 pt-2 pb-1">Quick select</div>
+                {PRESETS.map((p) => {
+                  const isActive = activePresetLabel === p.label;
+                  return (
+                    <button
+                      key={p.label}
+                      onClick={() => setRange(p.getRange())}
+                      className={cn(
+                        "text-left text-sm px-3 py-1.5 rounded-sm whitespace-nowrap transition-colors",
+                        isActive
+                          ? "bg-primary text-primary-foreground"
+                          : "text-foreground/80 hover:bg-secondary hover:text-foreground"
+                      )}
+                    >
+                      {p.label}
+                    </button>
+                  );
+                })}
+              </div>
+              <Calendar
+                mode="range"
+                selected={range}
+                onSelect={(r) => r && setRange(r)}
+                numberOfMonths={1}
+                defaultMonth={range.from}
+                initialFocus
+                className={cn("p-3 pointer-events-auto")}
+              />
             </div>
-            <Calendar
-              mode="range"
-              selected={range}
-              onSelect={(r) => r && setRange(r)}
-              numberOfMonths={2}
-              captionLayout="dropdown-buttons"
-              fromYear={2015}
-              toYear={new Date().getFullYear() + 5}
-              defaultMonth={range.from}
-              initialFocus
-              className={cn("p-3 pointer-events-auto")}
-            />
           </PopoverContent>
         </Popover>
       </div>
