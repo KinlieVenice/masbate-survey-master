@@ -1,16 +1,189 @@
-// Update this page (the content is just a fallback if you fail to update the page)
+import { Link } from "react-router-dom";
+import { ArrowRight, MapPin, Phone, Mail, Compass, Ruler, FileText, ScrollText } from "lucide-react";
+import heroLand from "@/assets/hero-land.jpg";
+import surveyor from "@/assets/surveyor-equipment.jpg";
+import topo from "@/assets/topo-map.jpg";
+import { ADDRESS, EMAIL, PHONE, SERVICES } from "@/lib/services";
+import { FacebookCTA } from "@/components/site/FacebookCTA";
 
-// IMPORTANT: Fully REPLACE this with your own code
-const PlaceholderIndex = () => {
-  // PLACEHOLDER: Replace this entire return statement with the user's app.
-  // The inline background color is intentionally not part of the design system.
+const Index = () => {
   return (
-    <div className="flex min-h-screen items-center justify-center" style={{ backgroundColor: '#fcfbf8' }}>
-      <img data-lovable-blank-page-placeholder="REMOVE_THIS" src="/placeholder.svg" alt="Your app will live here!" />
-    </div>
+    <>
+      {/* Hero */}
+      <section className="relative min-h-[92vh] flex items-end overflow-hidden -mt-16 md:-mt-20">
+        <img
+          src={heroLand}
+          alt="Aerial view of Philippine farmland and mountains at sunrise"
+          className="absolute inset-0 h-full w-full object-cover"
+          width={1920}
+          height={1280}
+        />
+        <div className="absolute inset-0 bg-gradient-to-b from-primary/40 via-primary/20 to-primary/95" />
+        <div className="container relative pb-16 md:pb-28 pt-32">
+          <div className="max-w-3xl reveal-up">
+            <div className="inline-flex items-center gap-2 mb-6 text-primary-foreground/80 text-xs uppercase tracking-[0.25em]">
+              <span className="h-px w-8 bg-primary-foreground/40" />
+              Licensed Geodetic Engineering · Mobo, Masbate
+            </div>
+            <h1 className="font-serif text-primary-foreground text-4xl md:text-6xl lg:text-7xl leading-[1.05] text-balance mb-6">
+              The land beneath your feet,<br />
+              <span className="italic font-light">measured with care.</span>
+            </h1>
+            <p className="text-primary-foreground/85 text-base md:text-lg max-w-xl leading-relaxed mb-8">
+              Rañola Surveying Services helps Masbate landowners settle boundaries, divide parcels,
+              and secure documentation — with the precision modern transactions demand.
+            </p>
+            <div className="flex flex-wrap gap-4">
+              <FacebookCTA variant="light" />
+              <Link
+                to="/services"
+                className="inline-flex items-center gap-2 px-6 py-3.5 text-sm font-medium tracking-wide text-primary-foreground hover:gap-3 transition-all duration-300"
+              >
+                Explore services <ArrowRight className="h-4 w-4" />
+              </Link>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Trust strip */}
+      <section className="border-b border-border bg-secondary/40">
+        <div className="container py-6 grid grid-cols-2 md:grid-cols-4 gap-6 text-center md:text-left">
+          {[
+            { k: "20+", v: "Years field experience" },
+            { k: "500+", v: "Lots surveyed" },
+            { k: "7", v: "Survey services" },
+            { k: "100%", v: "Licensed & sealed" },
+          ].map((s) => (
+            <div key={s.v}>
+              <div className="font-serif text-2xl md:text-3xl text-primary">{s.k}</div>
+              <div className="text-xs uppercase tracking-wider text-muted-foreground mt-1">{s.v}</div>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* About / intro */}
+      <section className="container py-20 md:py-28 grid md:grid-cols-2 gap-12 lg:gap-20 items-center">
+        <div className="relative aspect-[4/5] rounded-sm overflow-hidden shadow-deep">
+          <img src={surveyor} alt="Total station theodolite in a green field" loading="lazy" className="absolute inset-0 h-full w-full object-cover" />
+          <div className="absolute inset-0 bg-gradient-to-t from-primary/30 to-transparent" />
+        </div>
+        <div>
+          <div className="text-xs uppercase tracking-[0.25em] text-muted-foreground mb-4">Who we are</div>
+          <h2 className="font-serif text-3xl md:text-5xl text-foreground leading-tight mb-6 text-balance">
+            A small team that knows the ground —<br />
+            <span className="italic font-light text-primary">and the paperwork.</span>
+          </h2>
+          <p className="text-muted-foreground leading-relaxed mb-4">
+            Based in Poblacion 1, Mobo, we work directly with families and businesses across Masbate
+            on relocation, subdivision, consolidation, and as-built surveys. We handle field work,
+            plan preparation, and the back-and-forth with DENR, LRA, CENRO, and barangay offices so
+            you don't have to.
+          </p>
+          <p className="text-muted-foreground leading-relaxed mb-8">
+            Every plan that leaves our office is signed and sealed by a licensed Geodetic Engineer.
+          </p>
+          <Link to="/about" className="inline-flex items-center gap-2 text-primary text-sm font-medium hover:gap-3 transition-all">
+            More about our practice <ArrowRight className="h-4 w-4" />
+          </Link>
+        </div>
+      </section>
+
+      {/* Services */}
+      <section className="bg-secondary/30 border-y border-border">
+        <div className="container py-20 md:py-28">
+          <div className="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-4">
+            <div>
+              <div className="text-xs uppercase tracking-[0.25em] text-muted-foreground mb-4">What we do</div>
+              <h2 className="font-serif text-3xl md:text-5xl text-foreground leading-tight max-w-2xl text-balance">
+                Surveying services, end to end.
+              </h2>
+            </div>
+            <Link to="/services" className="text-sm text-primary font-medium inline-flex items-center gap-2 hover:gap-3 transition-all">
+              View all <ArrowRight className="h-4 w-4" />
+            </Link>
+          </div>
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-px bg-border rounded-sm overflow-hidden shadow-soft">
+            {SERVICES.map((s, i) => {
+              const Icon = [Compass, Ruler, FileText, ScrollText, Compass, Ruler, FileText][i];
+              return (
+                <Link
+                  key={s.slug}
+                  to={`/services/${s.slug}`}
+                  className="group bg-card p-7 md:p-9 hover:bg-secondary/40 transition-colors duration-300 ease-natural relative"
+                >
+                  <Icon className="h-6 w-6 text-primary/70 mb-6" strokeWidth={1.4} />
+                  <h3 className="font-serif text-xl md:text-2xl text-foreground mb-3">{s.name}</h3>
+                  <p className="text-sm text-muted-foreground leading-relaxed mb-6">{s.short}</p>
+                  <span className="inline-flex items-center gap-2 text-xs text-primary font-medium uppercase tracking-wider group-hover:gap-3 transition-all">
+                    Learn more <ArrowRight className="h-3.5 w-3.5" />
+                  </span>
+                </Link>
+              );
+            })}
+          </div>
+        </div>
+      </section>
+
+      {/* Process */}
+      <section className="container py-20 md:py-28">
+        <div className="text-xs uppercase tracking-[0.25em] text-muted-foreground mb-4">How we work</div>
+        <h2 className="font-serif text-3xl md:text-5xl text-foreground leading-tight mb-14 max-w-2xl text-balance">
+          A clear path from inquiry to signed plan.
+        </h2>
+        <div className="grid md:grid-cols-4 gap-10 md:gap-6">
+          {[
+            { n: "01", t: "Consultation", d: "Send your documents and concerns over Facebook or phone. We assess scope and quote." },
+            { n: "02", t: "Document review", d: "We verify titles, tax declarations, and prior plans before stepping into the field." },
+            { n: "03", t: "Field work", d: "Our team measures, marks, and notifies adjoining owners as the survey requires." },
+            { n: "04", t: "Plan & filing", d: "Signed and sealed plan delivered, plus help with submission to concerned offices." },
+          ].map((p) => (
+            <div key={p.n} className="border-t border-primary/30 pt-6">
+              <div className="text-xs text-primary/60 tracking-widest mb-3">{p.n}</div>
+              <div className="font-serif text-xl text-foreground mb-2">{p.t}</div>
+              <p className="text-sm text-muted-foreground leading-relaxed">{p.d}</p>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* CTA */}
+      <section className="relative overflow-hidden">
+        <img src={topo} alt="" className="absolute inset-0 h-full w-full object-cover opacity-15" loading="lazy" />
+        <div className="absolute inset-0 bg-gradient-forest" />
+        <div className="container relative py-20 md:py-28 grid md:grid-cols-2 gap-12 items-center">
+          <div>
+            <h2 className="font-serif text-primary-foreground text-3xl md:text-5xl leading-tight mb-6 text-balance">
+              Ready to talk about your lot?
+            </h2>
+            <p className="text-primary-foreground/75 leading-relaxed mb-8 max-w-md">
+              Send us a message on Facebook with your documents and questions — we usually reply
+              the same day.
+            </p>
+            <FacebookCTA variant="light" />
+          </div>
+          <div className="space-y-5 text-primary-foreground">
+            <div className="flex items-start gap-4 border-t border-primary-foreground/15 pt-5">
+              <MapPin className="h-5 w-5 mt-0.5 text-primary-foreground/60" />
+              <div>
+                <div className="text-xs uppercase tracking-wider text-primary-foreground/50 mb-1">Office</div>
+                <div className="text-sm">{ADDRESS}</div>
+              </div>
+            </div>
+            <div className="flex items-start gap-4 border-t border-primary-foreground/15 pt-5">
+              <Phone className="h-5 w-5 mt-0.5 text-primary-foreground/60" />
+              <a href={`tel:${PHONE}`} className="text-sm hover:underline underline-offset-4">{PHONE}</a>
+            </div>
+            <div className="flex items-start gap-4 border-t border-primary-foreground/15 pt-5">
+              <Mail className="h-5 w-5 mt-0.5 text-primary-foreground/60" />
+              <a href={`mailto:${EMAIL}`} className="text-sm hover:underline underline-offset-4">{EMAIL}</a>
+            </div>
+          </div>
+        </div>
+      </section>
+    </>
   );
 };
-
-const Index = PlaceholderIndex;
 
 export default Index;
