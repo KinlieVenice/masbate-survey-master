@@ -1,19 +1,32 @@
 import { useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
-import { ArrowLeft, ChevronLeft, ChevronRight, Download, FileText } from "lucide-react";
+import { ArrowLeft, ChevronLeft, ChevronRight, Download, FileText, Pencil, Upload, Trash2 } from "lucide-react";
 import { format } from "date-fns";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { getSale } from "@/lib/adminStore";
+import { getSale, upsertSale, type SaleFile } from "@/lib/adminStore";
+import { SaleFormDialog } from "@/components/admin/SaleFormDialog";
+import { toast } from "sonner";
 
 const peso = (n: number) => `₱${n.toLocaleString("en-PH", { minimumFractionDigits: 2 })}`;
+
+const fileToDataUrl = (file: File): Promise<string> =>
+  new Promise((res, rej) => {
+    const r = new FileReader();
+    r.onload = () => res(r.result as string);
+    r.onerror = rej;
+    r.readAsDataURL(file);
+  });
 
 const AdminSaleDetail = () => {
   const { id } = useParams();
   const nav = useNavigate();
+  const [version, setVersion] = useState(0);
   const sale = getSale(id || "");
   const [idx, setIdx] = useState(0);
+  const [editOpen, setEditOpen] = useState(false);
+  const [busy, setBusy] = useState(false);
 
   if (!sale) {
     return (
@@ -28,8 +41,56 @@ const AdminSaleDetail = () => {
   const isImage = file?.type.startsWith("image/");
   const isPdf = file?.type === "application/pdf";
 
+  const handleUpload = async (list: FileList | null) => {
+    if (!list || list.length === 0) return;
+    setBusy(true);
+    try {
+      const next: SaleFile[] = [];
+      for (const f of Array.from(list)) {
+        if (f.size > 8 * 1024 * 1024) {
+          toast.error(`${f.name} skipped — over 8MB`);
+          continue;
+        }
+        next.push({
+          id: Math.random().toString(36).slice(2, 10),
+          name: f.name,
+          type: f.type || "application/octet-stream",
+          dataUrl: await fileToDataUrl(f),
+        });
+      }
+      upsertSale({
+        id: sale.id,
+        clientName: sale.clientName,
+        surveyingDay: sale.surveyingDay,
+        totalAmount: sale.totalAmount,
+        paidAmount: sale.paidAmount,
+        checklist: sale.checklist,
+        files: [...sale.files, ...next],
+      });
+      toast.success(`${next.length} file${next.length === 1 ? "" : "s"} uploaded`);
+      setVersion((v) => v + 1);
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const handleDeleteFile = (fileId: string) => {
+    upsertSale({
+      id: sale.id,
+      clientName: sale.clientName,
+      surveyingDay: sale.surveyingDay,
+      totalAmount: sale.totalAmount,
+      paidAmount: sale.paidAmount,
+      checklist: sale.checklist,
+      files: sale.files.filter((f) => f.id !== fileId),
+    });
+    setIdx(0);
+    setVersion((v) => v + 1);
+    toast.success("File removed");
+  };
+
   return (
-    <div className="space-y-6">
+    <div className="space-y-6" key={version}>
       <Link to="/ranola-admin/sales" className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-primary">
         <ArrowLeft className="h-4 w-4" /> All sales
       </Link>
@@ -40,19 +101,35 @@ const AdminSaleDetail = () => {
           <h1 className="font-serif text-3xl text-foreground">{sale.clientName}</h1>
           <p className="text-sm text-muted-foreground mt-1">Surveying day · {format(new Date(sale.surveyingDay), "EEEE, MMM d, yyyy")}</p>
         </div>
-        <Badge variant="outline" className={
-          sale.status === "Paid" ? "bg-primary/15 text-primary border-primary/20" :
-          sale.status === "Down Payment" ? "bg-accent/20 text-accent-foreground border-accent/30" :
-          "bg-muted text-muted-foreground border-border"
-        }>{sale.status}</Badge>
+        <div className="flex items-center gap-3">
+          <Badge variant="outline" className={
+            sale.status === "Paid" ? "bg-primary/15 text-primary border-primary/20" :
+            sale.status === "Down Payment" ? "bg-accent/20 text-accent-foreground border-accent/30" :
+            "bg-muted text-muted-foreground border-border"
+          }>{sale.status}</Badge>
+          <Button onClick={() => setEditOpen(true)} className="gap-2">
+            <Pencil className="h-4 w-4" /> Edit sale
+          </Button>
+        </div>
       </div>
 
       <div className="grid lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2 space-y-6">
           <Card className="p-6">
-            <h2 className="font-serif text-xl mb-4">Files ({sale.files.length})</h2>
+            <div className="flex items-center justify-between mb-4 gap-3">
+              <h2 className="font-serif text-xl">Files ({sale.files.length})</h2>
+              <label className="inline-flex items-center gap-2 text-sm px-3 py-2 rounded-md border border-input bg-background hover:bg-secondary/40 cursor-pointer transition-colors">
+                <Upload className="h-4 w-4" />
+                {busy ? "Uploading…" : "Upload files"}
+                <input type="file" multiple className="hidden" disabled={busy} onChange={(e) => { handleUpload(e.target.files); e.target.value = ""; }} />
+              </label>
+            </div>
             {sale.files.length === 0 ? (
-              <p className="text-sm text-muted-foreground py-12 text-center">No files uploaded yet.</p>
+              <label className="flex flex-col items-center justify-center gap-2 border-2 border-dashed border-border rounded-sm p-12 cursor-pointer hover:bg-muted/30 transition-colors">
+                <Upload className="h-6 w-6 text-muted-foreground" />
+                <span className="text-sm text-muted-foreground">Click to upload — multiple files supported (max 8MB each)</span>
+                <input type="file" multiple className="hidden" disabled={busy} onChange={(e) => { handleUpload(e.target.files); e.target.value = ""; }} />
+              </label>
             ) : (
               <>
                 <div className="relative bg-muted/30 rounded-sm overflow-hidden border border-border">
@@ -89,15 +166,20 @@ const AdminSaleDetail = () => {
                 </div>
 
                 <div className="flex items-center justify-between mt-4 gap-4">
-                  <div className="text-sm">
+                  <div className="text-sm min-w-0">
                     <div className="font-medium text-foreground truncate">{file.name}</div>
                     <div className="text-xs text-muted-foreground">{idx + 1} of {sale.files.length}</div>
                   </div>
-                  <a href={file.dataUrl} download={file.name}>
-                    <Button variant="outline" size="sm" className="gap-2">
-                      <Download className="h-4 w-4" /> Download
+                  <div className="flex gap-2 shrink-0">
+                    <a href={file.dataUrl} download={file.name}>
+                      <Button variant="outline" size="sm" className="gap-2">
+                        <Download className="h-4 w-4" /> Download
+                      </Button>
+                    </a>
+                    <Button variant="outline" size="sm" className="gap-2 text-destructive hover:text-destructive" onClick={() => handleDeleteFile(file.id)}>
+                      <Trash2 className="h-4 w-4" /> Remove
                     </Button>
-                  </a>
+                  </div>
                 </div>
 
                 {sale.files.length > 1 && (
@@ -150,6 +232,8 @@ const AdminSaleDetail = () => {
           </Card>
         </div>
       </div>
+
+      <SaleFormDialog open={editOpen} onOpenChange={setEditOpen} sale={sale} onSaved={() => setVersion((v) => v + 1)} />
     </div>
   );
 };
