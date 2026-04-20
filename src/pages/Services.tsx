@@ -2,6 +2,7 @@ import { Link } from "react-router-dom";
 import { ArrowRight } from "lucide-react";
 import { SERVICES } from "@/lib/services";
 import { FacebookCTA } from "@/components/site/FacebookCTA";
+import { cn } from "@/lib/utils";
 
 const Services = () => {
   return (
@@ -21,11 +22,14 @@ const Services = () => {
 
       <section className="container pb-20 md:pb-28">
         <div className="grid md:grid-cols-2 gap-px bg-border rounded-sm overflow-hidden shadow-soft">
-          {SERVICES.map((s) => (
+          {SERVICES.map((s, i) => (
             <Link
               key={s.slug}
               to={`/services/${s.slug}`}
-              className="group bg-card p-8 md:p-10 hover:bg-secondary/40 transition-colors duration-300 ease-natural"
+              className={cn(
+                "group bg-card p-8 md:p-10 hover:bg-secondary/40 transition-colors duration-300 ease-natural",
+                i === SERVICES.length - 1 && SERVICES.length % 2 === 1 && "md:col-span-2"
+              )}
             >
               <div className="flex items-baseline justify-between mb-4 gap-4">
                 <h2 className="font-serif text-2xl md:text-3xl text-foreground">{s.name}</h2>
