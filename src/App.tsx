@@ -15,6 +15,7 @@ import Terms from "./pages/Terms";
 import NotFound from "./pages/NotFound";
 import AdminLogin from "./pages/admin/AdminLogin";
 import AdminDashboard from "./pages/admin/AdminDashboard";
+import AdminBookings from "./pages/admin/AdminBookings";
 import AdminSales from "./pages/admin/AdminSales";
 import AdminSaleDetail from "./pages/admin/AdminSaleDetail";
 import AdminExpenses from "./pages/admin/AdminExpenses";
@@ -42,6 +43,7 @@ const App = () => (
           <Route path="/ranola-admin" element={<AdminLogin />} />
           <Route element={<AdminLayout />}>
             <Route path="/ranola-admin/dashboard" element={<AdminDashboard />} />
+            <Route path="/ranola-admin/bookings" element={<AdminBookings />} />
             <Route path="/ranola-admin/sales" element={<AdminSales />} />
             <Route path="/ranola-admin/sales/:id" element={<AdminSaleDetail />} />
             <Route path="/ranola-admin/expenses" element={<AdminExpenses />} />

@@ -27,6 +27,7 @@ export const REQUIREMENTS_CHECKLIST = [
 export type Sale = {
   id: string;
   clientName: string;
+  location?: string;
   surveyingDay: string; // ISO
   totalAmount: number;
   paidAmount: number;
@@ -84,6 +85,7 @@ const seed = () => {
       return {
         id: uid(),
         clientName: ["Juan Dela Cruz", "Maria Santos", "Pedro Reyes", "Ana Lim", "Jose Cruz", "Liza Tan"][i],
+        location: ["Brgy. Nursery, Masbate City", "Brgy. Bayombon, Mobo", "Brgy. Tugbo, Masbate City", "Brgy. Asid, Masbate City", "Brgy. Sawang, Aroroy", "Brgy. Igang, Mobo"][i],
         surveyingDay: d.toISOString(),
         totalAmount: total,
         paidAmount: paid,
