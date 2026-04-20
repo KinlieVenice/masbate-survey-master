@@ -40,8 +40,8 @@ export const SiteHeader = () => {
             <img src={logo} alt="Rañola Surveying Services" className="h-full w-full object-cover" />
           </div>
           <div className="leading-none">
-            <div className="font-serif text-base md:text-lg text-foreground tracking-tight">Rañola</div>
-            <div className="text-[10px] md:text-[11px] uppercase tracking-[0.18em] text-muted-foreground">
+            <div className={cn("font-serif text-base md:text-lg tracking-tight transition-colors", scrolled ? "text-foreground" : "text-white")}>Rañola</div>
+            <div className={cn("text-[10px] md:text-[11px] uppercase tracking-[0.18em] transition-colors", scrolled ? "text-muted-foreground" : "text-white/70")}>
               Surveying Services
             </div>
           </div>
@@ -56,7 +56,9 @@ export const SiteHeader = () => {
               className={({ isActive }) =>
                 cn(
                   "text-sm tracking-wide transition-colors",
-                  isActive ? "text-primary font-medium" : "text-foreground/70 hover:text-foreground"
+                  isActive
+                    ? scrolled ? "text-primary font-medium" : "text-white font-medium"
+                    : scrolled ? "text-foreground/70 hover:text-foreground" : "text-white/80 hover:text-white"
                 )
               }
             >
@@ -67,7 +69,7 @@ export const SiteHeader = () => {
 
         <button
           aria-label="Menu"
-          className="md:hidden p-2 -mr-2 text-foreground"
+          className={cn("md:hidden p-2 -mr-2 transition-colors", scrolled ? "text-foreground" : "text-white")}
           onClick={() => setOpen((v) => !v)}
         >
           {open ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
