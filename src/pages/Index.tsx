@@ -5,6 +5,7 @@ import surveyor from "@/assets/surveyor-equipment.jpg";
 import topo from "@/assets/topo-map.jpg";
 import { ADDRESS, EMAIL, PHONE, SERVICES } from "@/lib/services";
 import { FacebookCTA } from "@/components/site/FacebookCTA";
+import { cn } from "@/lib/utils";
 
 const Index = () => {
   return (
