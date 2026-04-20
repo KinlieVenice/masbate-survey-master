@@ -104,7 +104,7 @@ export const SERVICES: Service[] = [
   },
 ];
 
-export const FACEBOOK_URL = "https://facebook.com/ranolasurveying";
+export const FACEBOOK_URL = "https://www.facebook.com/RanolaSurveyingPAX";
 export const PHONE = "09121181559";
 export const EMAIL = "ranolasurveying@gmail.com";
 export const ADDRESS = "San Roque St., Poblacion 1, Mobo, Masbate";
