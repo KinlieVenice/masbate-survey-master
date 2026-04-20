@@ -1,11 +1,13 @@
 import { Link } from "react-router-dom";
-import { ArrowRight, MapPin, Phone, Mail, Compass, Ruler, FileText, ScrollText } from "lucide-react";
+import { ArrowRight, MapPin, Phone, Mail, Compass, Ruler, FileText, ScrollText, Quote } from "lucide-react";
 import heroLand from "@/assets/hero-land.jpg";
 import surveyor from "@/assets/surveyor-equipment.jpg";
 import topo from "@/assets/topo-map.jpg";
 import { ADDRESS, EMAIL, PHONE, SERVICES } from "@/lib/services";
 import { FacebookCTA } from "@/components/site/FacebookCTA";
 import { cn } from "@/lib/utils";
+import { Card, CardContent } from "@/components/ui/card";
+import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
 
 const Index = () => {
   return (
@@ -154,6 +156,67 @@ const Index = () => {
               <p className="text-sm text-muted-foreground leading-relaxed">{p.d}</p>
             </div>
           ))}
+        </div>
+      </section>
+
+      {/* Testimonials */}
+      <section className="bg-secondary/30 border-y border-border">
+        <div className="container py-20 md:py-28">
+          <div className="text-center mb-12">
+            <div className="text-xs uppercase tracking-[0.25em] text-muted-foreground mb-4">What clients say</div>
+            <h2 className="font-serif text-3xl md:text-5xl text-foreground leading-tight text-balance">
+              Trusted by landowners across Masbate.
+            </h2>
+          </div>
+          <Carousel
+            opts={{
+              align: "start",
+              loop: true,
+            }}
+            className="w-full max-w-5xl mx-auto"
+          >
+            <CarouselContent className="-ml-4">
+              {[
+                {
+                  quote: "Rañola Surveying handled our family land subdivision with professionalism. They walked us through every step and made sure all documents were filed correctly.",
+                  name: "Maria Santos",
+                  role: "Landowner, Mobo",
+                },
+                {
+                  quote: "Fast and accurate relocation survey. They found our lost property corners and settled a long-standing boundary dispute with our neighbor.",
+                  name: "Roberto Cruz",
+                  role: "Property Developer, Masbate City",
+                },
+                {
+                  quote: "The as-built survey for our commercial building was completed on time and accepted by the city engineer without any revisions needed.",
+                  name: "Elena Reyes",
+                  role: "Business Owner, Mobo",
+                },
+                {
+                  quote: "Professional service from start to finish. They prepared our sketch plan for the bank loan application and everything went smoothly.",
+                  name: "Antonio Garcia",
+                  role: "Farmer, Masbate",
+                },
+              ].map((t, i) => (
+                <CarouselItem key={i} className="pl-4 md:basis-1/2 lg:basis-1/2">
+                  <Card className="h-full bg-card border-border">
+                    <CardContent className="p-6 md:p-8 flex flex-col h-full">
+                      <Quote className="h-8 w-8 text-primary/40 mb-4" />
+                      <p className="text-muted-foreground leading-relaxed flex-grow mb-6">
+                        "{t.quote}"
+                      </p>
+                      <div className="border-t border-border pt-4">
+                        <div className="font-medium text-foreground">{t.name}</div>
+                        <div className="text-sm text-muted-foreground">{t.role}</div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </CarouselItem>
+              ))}
+            </CarouselContent>
+            <CarouselPrevious className="hidden md:flex -left-12 border-border bg-card hover:bg-secondary" />
+            <CarouselNext className="hidden md:flex -right-12 border-border bg-card hover:bg-secondary" />
+          </Carousel>
         </div>
       </section>
 
