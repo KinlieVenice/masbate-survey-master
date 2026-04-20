@@ -9,7 +9,6 @@ import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import { REQUIREMENTS_CHECKLIST, computeStatus, upsertSale, type Sale, type SaleFile } from "@/lib/adminStore";
@@ -118,12 +117,12 @@ export const SaleFormDialog = ({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl max-h-[90vh] flex flex-col">
-        <DialogHeader>
+      <DialogContent className="max-w-2xl max-h-[90vh] flex flex-col p-0 gap-0">
+        <DialogHeader className="px-6 pt-6 pb-4 border-b border-border">
           <DialogTitle className="font-serif text-2xl">{sale ? "Edit sale" : "New sale"}</DialogTitle>
         </DialogHeader>
-        <ScrollArea className="flex-1 -mx-6 px-6">
-          <div className="space-y-5 py-2">
+        <div className="flex-1 overflow-y-auto px-6 py-5">
+          <div className="space-y-5">
             <div className="grid sm:grid-cols-2 gap-4">
               <div className="space-y-1.5">
                 <Label htmlFor="client">Client name</Label>
@@ -187,18 +186,20 @@ export const SaleFormDialog = ({
             </div>
 
             <div>
-              <Label className="block mb-3">File uploads (bulk)</Label>
+              <Label className="block mb-3">Bulk file upload</Label>
               <label className="flex flex-col items-center justify-center gap-2 border-2 border-dashed border-border rounded-sm p-6 cursor-pointer hover:bg-muted/30 transition-colors">
                 <Upload className="h-5 w-5 text-muted-foreground" />
-                <span className="text-sm text-muted-foreground">Click to upload — multiple files supported (max 8MB each)</span>
-                <input type="file" multiple className="hidden" onChange={(e) => handleFiles(e.target.files)} />
+                <span className="text-sm text-muted-foreground text-center">Click to upload — multiple files supported (max 8MB each)</span>
+                <span className="text-xs text-muted-foreground/70">Images, PDFs, documents</span>
+                <input type="file" multiple accept="image/*,application/pdf,.doc,.docx,.xls,.xlsx" className="hidden" onChange={(e) => handleFiles(e.target.files)} />
               </label>
               {files.length > 0 && (
                 <div className="mt-3 space-y-2">
+                  <div className="text-xs text-muted-foreground">{files.length} file{files.length > 1 ? "s" : ""} attached</div>
                   {files.map((f) => (
                     <div key={f.id} className="flex items-center justify-between gap-3 px-3 py-2 rounded-sm bg-muted/40 border border-border text-sm">
                       <span className="truncate">{f.name}</span>
-                      <button type="button" onClick={() => setFiles((p) => p.filter((x) => x.id !== f.id))} className="text-muted-foreground hover:text-destructive">
+                      <button type="button" onClick={() => setFiles((p) => p.filter((x) => x.id !== f.id))} className="text-muted-foreground hover:text-destructive shrink-0">
                         <X className="h-4 w-4" />
                       </button>
                     </div>
@@ -207,8 +208,8 @@ export const SaleFormDialog = ({
               )}
             </div>
           </div>
-        </ScrollArea>
-        <DialogFooter>
+        </div>
+        <DialogFooter className="px-6 py-4 border-t border-border">
           <Button variant="outline" onClick={() => onOpenChange(false)}>Cancel</Button>
           <Button onClick={submit} disabled={busy}>{sale ? "Save changes" : "Add sale"}</Button>
         </DialogFooter>
