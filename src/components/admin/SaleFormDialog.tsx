@@ -40,6 +40,7 @@ export const SaleFormDialog = ({
   onSaved: () => void;
 }) => {
   const [clientName, setClientName] = useState("");
+  const [location, setLocation] = useState("");
   const [date, setDate] = useState<Date>(new Date());
   const [total, setTotal] = useState("0");
   const [paid, setPaid] = useState("0");
@@ -51,6 +52,7 @@ export const SaleFormDialog = ({
     if (open) {
       if (sale) {
         setClientName(sale.clientName);
+        setLocation(sale.location ?? "");
         setDate(new Date(sale.surveyingDay));
         setTotal(String(sale.totalAmount));
         setPaid(String(sale.paidAmount));
@@ -58,6 +60,7 @@ export const SaleFormDialog = ({
         setFiles(sale.files);
       } else {
         setClientName("");
+        setLocation("");
         setDate(new Date());
         setTotal("0");
         setPaid("0");
@@ -100,6 +103,7 @@ export const SaleFormDialog = ({
       upsertSale({
         id: sale?.id,
         clientName: v.clientName,
+        location: location.trim() || undefined,
         surveyingDay: date.toISOString(),
         totalAmount: v.totalAmount,
         paidAmount: v.paidAmount,
@@ -142,6 +146,11 @@ export const SaleFormDialog = ({
                   </PopoverContent>
                 </Popover>
               </div>
+            </div>
+
+            <div className="space-y-1.5">
+              <Label htmlFor="location">Location (Barangay / Municipality)</Label>
+              <Input id="location" value={location} onChange={(e) => setLocation(e.target.value)} maxLength={160} placeholder="e.g. Brgy. Nursery, Masbate City" />
             </div>
 
             <div className="grid sm:grid-cols-3 gap-4">

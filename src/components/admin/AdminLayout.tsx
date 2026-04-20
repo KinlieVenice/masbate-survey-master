@@ -5,6 +5,7 @@ import {
   Receipt,
   Wallet,
   BarChart3,
+  CalendarDays,
   LogOut,
   Menu,
   X,
@@ -15,6 +16,7 @@ import { cn } from "@/lib/utils";
 
 const items = [
   { to: "/ranola-admin/dashboard", label: "Dashboard", icon: LayoutDashboard },
+  { to: "/ranola-admin/bookings", label: "Booking Calendar", icon: CalendarDays },
   { to: "/ranola-admin/sales", label: "Sales", icon: Receipt },
   { to: "/ranola-admin/expenses", label: "Expenses", icon: Wallet },
   { to: "/ranola-admin/reports", label: "Reports", icon: BarChart3 },
