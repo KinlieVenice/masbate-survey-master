@@ -208,9 +208,9 @@ export const SaleFormDialog = ({
               <Label className="block mb-3">Bulk file upload</Label>
               <label className="flex flex-col items-center justify-center gap-2 border-2 border-dashed border-border rounded-sm p-6 cursor-pointer hover:bg-muted/30 transition-colors">
                 <Upload className="h-5 w-5 text-muted-foreground" />
-                <span className="text-sm text-muted-foreground text-center">Click to upload — multiple files supported (max 8MB each)</span>
-                <span className="text-xs text-muted-foreground/70">Images, PDFs, documents</span>
-                <input type="file" multiple accept="image/*,application/pdf,.doc,.docx,.xls,.xlsx" className="hidden" onChange={(e) => handleFiles(e.target.files)} />
+                <span className="text-sm text-muted-foreground text-center">Click to upload — up to 10 files (max 8MB each)</span>
+                <span className="text-xs text-muted-foreground/70">Images, PDFs, documents · {files.length}/10 used</span>
+                <input type="file" multiple accept="image/*,application/pdf,.doc,.docx,.xls,.xlsx" className="hidden" disabled={files.length >= 10} onChange={(e) => { handleFiles(e.target.files); e.target.value = ""; }} />
               </label>
               {files.length > 0 && (
                 <div className="mt-3 space-y-2">
