@@ -76,8 +76,8 @@ const Terms = () => {
             </div>
           </div>
         </div>
-      </div>
-    </SiteLayout>
+      </section>
+    </>
   );
 };
 
