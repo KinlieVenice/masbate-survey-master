@@ -74,12 +74,22 @@ export const SaleFormDialog = ({
   const paidNum = Number(paid) || 0;
   const status = computeStatus(totalNum, paidNum);
 
+  const MAX_FILES = 10;
   const handleFiles = async (list: FileList | null) => {
     if (!list) return;
     setBusy(true);
     try {
       const next: SaleFile[] = [];
-      for (const f of Array.from(list)) {
+      const remaining = MAX_FILES - files.length;
+      if (remaining <= 0) {
+        toast.error(`Maximum ${MAX_FILES} files allowed`);
+        return;
+      }
+      const incoming = Array.from(list).slice(0, remaining);
+      if (list.length > remaining) {
+        toast.error(`Only ${remaining} more file${remaining > 1 ? "s" : ""} allowed (max ${MAX_FILES})`);
+      }
+      for (const f of incoming) {
         if (f.size > 8 * 1024 * 1024) {
           toast.error(`${f.name} skipped — over 8MB`);
           continue;
