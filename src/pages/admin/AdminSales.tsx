@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { format } from "date-fns";
-import { Plus, Search, Pencil, Trash2 } from "lucide-react";
+import { Plus, Search, Pencil, Trash2, MapPin } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -24,7 +24,10 @@ const AdminSales = () => {
   const [editing, setEditing] = useState<Sale | null>(null);
   const [open, setOpen] = useState(false);
 
-  const sales = listSales().filter((s) => s.clientName.toLowerCase().includes(search.toLowerCase()));
+  const sales = listSales().filter((s) => {
+    const q = search.toLowerCase();
+    return s.clientName.toLowerCase().includes(q) || (s.location ?? "").toLowerCase().includes(q);
+  });
 
   const refresh = () => setVersion((v) => v + 1);
 
@@ -43,7 +46,7 @@ const AdminSales = () => {
       <Card className="p-4">
         <div className="relative max-w-sm mb-4">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-          <Input placeholder="Search client name…" value={search} onChange={(e) => setSearch(e.target.value)} className="pl-9" />
+          <Input placeholder="Search client or location…" value={search} onChange={(e) => setSearch(e.target.value)} className="pl-9" />
         </div>
 
         {/* Desktop table */}
@@ -52,6 +55,7 @@ const AdminSales = () => {
             <thead>
               <tr className="text-left text-xs uppercase tracking-wider text-muted-foreground border-b border-border">
                 <th className="py-3 px-2 font-medium">Client</th>
+                <th className="py-3 px-2 font-medium">Location</th>
                 <th className="py-3 px-2 font-medium">Surveying day</th>
                 <th className="py-3 px-2 font-medium text-right">Total</th>
                 <th className="py-3 px-2 font-medium text-right">Paid</th>
@@ -67,6 +71,16 @@ const AdminSales = () => {
                       {s.clientName}
                     </Link>
                     <div className="text-xs text-muted-foreground">{s.checklist.filter(Boolean).length}/{s.checklist.length} requirements · {s.files.length} files</div>
+                  </td>
+                  <td className="py-3 px-2 text-muted-foreground max-w-[220px]">
+                    {s.location ? (
+                      <span className="inline-flex items-start gap-1.5">
+                        <MapPin className="h-3.5 w-3.5 mt-0.5 text-primary shrink-0" />
+                        <span className="truncate" title={s.location}>{s.location}</span>
+                      </span>
+                    ) : (
+                      <span className="text-muted-foreground/50 italic text-xs">Not set</span>
+                    )}
                   </td>
                   <td className="py-3 px-2 text-muted-foreground">{format(new Date(s.surveyingDay), "MMM d, yyyy")}</td>
                   <td className="py-3 px-2 text-right">{peso(s.totalAmount)}</td>
@@ -85,7 +99,7 @@ const AdminSales = () => {
                 </tr>
               ))}
               {sales.length === 0 && (
-                <tr><td colSpan={6} className="py-12 text-center text-muted-foreground text-sm">No sales found.</td></tr>
+                <tr><td colSpan={7} className="py-12 text-center text-muted-foreground text-sm">No sales found.</td></tr>
               )}
             </tbody>
           </table>
@@ -99,7 +113,13 @@ const AdminSales = () => {
                 <Link to={`/ranola-admin/sales/${s.id}`} className="font-medium text-foreground">{s.clientName}</Link>
                 <Badge variant="outline" className={statusVariant(s.status)}>{s.status}</Badge>
               </div>
-              <div className="text-xs text-muted-foreground mb-3">{format(new Date(s.surveyingDay), "MMM d, yyyy")}</div>
+              <div className="text-xs text-muted-foreground mb-2">{format(new Date(s.surveyingDay), "MMM d, yyyy")}</div>
+              {s.location && (
+                <div className="flex items-start gap-1.5 text-xs text-muted-foreground mb-3">
+                  <MapPin className="h-3.5 w-3.5 mt-0.5 text-primary shrink-0" />
+                  <span className="leading-snug">{s.location}</span>
+                </div>
+              )}
               <div className="flex items-end justify-between">
                 <div>
                   <div className="text-xs text-muted-foreground">Paid / Total</div>
