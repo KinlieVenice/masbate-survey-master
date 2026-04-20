@@ -1,5 +1,5 @@
 import { SiteLayout } from "@/components/site/SiteLayout";
-import { FileText, AlertCircle, CheckCircle, Clock, Shield, Wallet } from "lucide-react";
+import { FileText, AlertCircle, CheckCircle, Shield, Wallet } from "lucide-react";
 
 const Terms = () => {
   return (
@@ -77,6 +77,9 @@ const Terms = () => {
             </div>
           </div>
         </div>
-      </section>
+      </div>
+    </SiteLayout>
+  );
+};
 
-      {/* CTA */}
+export default Terms;
