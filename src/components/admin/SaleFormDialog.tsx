@@ -1,0 +1,218 @@
+import { useEffect, useState } from "react";
+import { format } from "date-fns";
+import { CalendarIcon, Upload, X } from "lucide-react";
+import { z } from "zod";
+import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Calendar } from "@/components/ui/calendar";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Badge } from "@/components/ui/badge";
+import { toast } from "sonner";
+import { REQUIREMENTS_CHECKLIST, computeStatus, upsertSale, type Sale, type SaleFile } from "@/lib/adminStore";
+import { cn } from "@/lib/utils";
+
+const schema = z.object({
+  clientName: z.string().trim().min(2, "Client name required").max(120),
+  totalAmount: z.number().min(0, "Must be ≥ 0"),
+  paidAmount: z.number().min(0, "Must be ≥ 0"),
+});
+
+const fileToDataUrl = (file: File): Promise<string> =>
+  new Promise((res, rej) => {
+    const r = new FileReader();
+    r.onload = () => res(r.result as string);
+    r.onerror = rej;
+    r.readAsDataURL(file);
+  });
+
+export const SaleFormDialog = ({
+  open,
+  onOpenChange,
+  sale,
+  onSaved,
+}: {
+  open: boolean;
+  onOpenChange: (v: boolean) => void;
+  sale: Sale | null;
+  onSaved: () => void;
+}) => {
+  const [clientName, setClientName] = useState("");
+  const [date, setDate] = useState<Date>(new Date());
+  const [total, setTotal] = useState("0");
+  const [paid, setPaid] = useState("0");
+  const [checklist, setChecklist] = useState<boolean[]>(REQUIREMENTS_CHECKLIST.map(() => false));
+  const [files, setFiles] = useState<SaleFile[]>([]);
+  const [busy, setBusy] = useState(false);
+
+  useEffect(() => {
+    if (open) {
+      if (sale) {
+        setClientName(sale.clientName);
+        setDate(new Date(sale.surveyingDay));
+        setTotal(String(sale.totalAmount));
+        setPaid(String(sale.paidAmount));
+        setChecklist(sale.checklist.length === REQUIREMENTS_CHECKLIST.length ? sale.checklist : REQUIREMENTS_CHECKLIST.map(() => false));
+        setFiles(sale.files);
+      } else {
+        setClientName("");
+        setDate(new Date());
+        setTotal("0");
+        setPaid("0");
+        setChecklist(REQUIREMENTS_CHECKLIST.map(() => false));
+        setFiles([]);
+      }
+    }
+  }, [open, sale]);
+
+  const totalNum = Number(total) || 0;
+  const paidNum = Number(paid) || 0;
+  const status = computeStatus(totalNum, paidNum);
+
+  const handleFiles = async (list: FileList | null) => {
+    if (!list) return;
+    setBusy(true);
+    try {
+      const next: SaleFile[] = [];
+      for (const f of Array.from(list)) {
+        if (f.size > 8 * 1024 * 1024) {
+          toast.error(`${f.name} skipped — over 8MB`);
+          continue;
+        }
+        next.push({
+          id: Math.random().toString(36).slice(2, 10),
+          name: f.name,
+          type: f.type || "application/octet-stream",
+          dataUrl: await fileToDataUrl(f),
+        });
+      }
+      setFiles((prev) => [...prev, ...next]);
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const submit = () => {
+    try {
+      const v = schema.parse({ clientName, totalAmount: totalNum, paidAmount: paidNum });
+      upsertSale({
+        id: sale?.id,
+        clientName: v.clientName,
+        surveyingDay: date.toISOString(),
+        totalAmount: v.totalAmount,
+        paidAmount: v.paidAmount,
+        checklist,
+        files,
+      });
+      toast.success(sale ? "Sale updated" : "Sale added");
+      onSaved();
+      onOpenChange(false);
+    } catch (err) {
+      const msg = err instanceof z.ZodError ? err.errors[0].message : "Failed to save";
+      toast.error(msg);
+    }
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="max-w-2xl max-h-[90vh] flex flex-col">
+        <DialogHeader>
+          <DialogTitle className="font-serif text-2xl">{sale ? "Edit sale" : "New sale"}</DialogTitle>
+        </DialogHeader>
+        <ScrollArea className="flex-1 -mx-6 px-6">
+          <div className="space-y-5 py-2">
+            <div className="grid sm:grid-cols-2 gap-4">
+              <div className="space-y-1.5">
+                <Label htmlFor="client">Client name</Label>
+                <Input id="client" value={clientName} onChange={(e) => setClientName(e.target.value)} maxLength={120} />
+              </div>
+              <div className="space-y-1.5">
+                <Label>Surveying day</Label>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button variant="outline" className="w-full justify-start gap-2 font-normal">
+                      <CalendarIcon className="h-4 w-4" />
+                      {format(date, "PPP")}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0" align="start">
+                    <Calendar mode="single" selected={date} onSelect={(d) => d && setDate(d)} initialFocus className={cn("p-3 pointer-events-auto")} />
+                  </PopoverContent>
+                </Popover>
+              </div>
+            </div>
+
+            <div className="grid sm:grid-cols-3 gap-4">
+              <div className="space-y-1.5">
+                <Label htmlFor="total">Total amount (₱)</Label>
+                <Input id="total" type="number" min={0} step="0.01" value={total} onChange={(e) => setTotal(e.target.value)} />
+              </div>
+              <div className="space-y-1.5">
+                <Label htmlFor="paid">Paid amount (₱)</Label>
+                <Input id="paid" type="number" min={0} step="0.01" value={paid} onChange={(e) => setPaid(e.target.value)} />
+              </div>
+              <div className="space-y-1.5">
+                <Label>Status (auto)</Label>
+                <div className="h-10 flex items-center px-3 rounded-md border border-input bg-muted/40">
+                  <Badge variant="outline" className={
+                    status === "Paid" ? "bg-primary/15 text-primary border-primary/20" :
+                    status === "Down Payment" ? "bg-accent/20 text-accent-foreground border-accent/30" :
+                    "bg-muted text-muted-foreground border-border"
+                  }>{status}</Badge>
+                </div>
+              </div>
+            </div>
+
+            <div>
+              <Label className="block mb-3">Requirements checklist</Label>
+              <div className="space-y-2 border border-border rounded-sm p-4 bg-muted/20">
+                {REQUIREMENTS_CHECKLIST.map((req, i) => (
+                  <label key={i} className="flex items-start gap-3 text-sm cursor-pointer py-1">
+                    <Checkbox
+                      checked={checklist[i]}
+                      onCheckedChange={(v) => {
+                        const next = [...checklist];
+                        next[i] = v === true;
+                        setChecklist(next);
+                      }}
+                    />
+                    <span className="text-foreground/85 leading-relaxed">{i + 1}. {req}</span>
+                  </label>
+                ))}
+              </div>
+              <p className="text-xs text-muted-foreground mt-2">{checklist.filter(Boolean).length} of {checklist.length} complete</p>
+            </div>
+
+            <div>
+              <Label className="block mb-3">File uploads (bulk)</Label>
+              <label className="flex flex-col items-center justify-center gap-2 border-2 border-dashed border-border rounded-sm p-6 cursor-pointer hover:bg-muted/30 transition-colors">
+                <Upload className="h-5 w-5 text-muted-foreground" />
+                <span className="text-sm text-muted-foreground">Click to upload — multiple files supported (max 8MB each)</span>
+                <input type="file" multiple className="hidden" onChange={(e) => handleFiles(e.target.files)} />
+              </label>
+              {files.length > 0 && (
+                <div className="mt-3 space-y-2">
+                  {files.map((f) => (
+                    <div key={f.id} className="flex items-center justify-between gap-3 px-3 py-2 rounded-sm bg-muted/40 border border-border text-sm">
+                      <span className="truncate">{f.name}</span>
+                      <button type="button" onClick={() => setFiles((p) => p.filter((x) => x.id !== f.id))} className="text-muted-foreground hover:text-destructive">
+                        <X className="h-4 w-4" />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+        </ScrollArea>
+        <DialogFooter>
+          <Button variant="outline" onClick={() => onOpenChange(false)}>Cancel</Button>
+          <Button onClick={submit} disabled={busy}>{sale ? "Save changes" : "Add sale"}</Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+};
