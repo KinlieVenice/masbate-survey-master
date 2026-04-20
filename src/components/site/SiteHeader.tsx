@@ -31,7 +31,7 @@ export const SiteHeader = () => {
     <header
       className={cn(
         "fixed top-0 inset-x-0 z-50 transition-all duration-500 ease-natural",
-        scrolled
+        !transparent
           ? "bg-background/85 backdrop-blur-md border-b border-border/60"
           : "bg-transparent"
       )}
@@ -42,8 +42,8 @@ export const SiteHeader = () => {
             <img src={logo} alt="Rañola Surveying Services" className="h-full w-full object-cover" />
           </div>
           <div className="leading-none">
-            <div className={cn("font-serif text-base md:text-lg tracking-tight transition-colors", scrolled ? "text-foreground" : "text-white")}>Rañola</div>
-            <div className={cn("text-[10px] md:text-[11px] uppercase tracking-[0.18em] transition-colors", scrolled ? "text-muted-foreground" : "text-white/70")}>
+            <div className={cn("font-serif text-base md:text-lg tracking-tight transition-colors", transparent ? "text-white" : "text-foreground")}>Rañola</div>
+            <div className={cn("text-[10px] md:text-[11px] uppercase tracking-[0.18em] transition-colors", transparent ? "text-white/70" : "text-muted-foreground")}>
               Surveying Services
             </div>
           </div>
@@ -59,8 +59,8 @@ export const SiteHeader = () => {
                 cn(
                   "text-sm tracking-wide transition-colors",
                   isActive
-                    ? scrolled ? "text-primary font-medium" : "text-white font-medium"
-                    : scrolled ? "text-foreground/70 hover:text-foreground" : "text-white/80 hover:text-white"
+                    ? transparent ? "text-white font-medium" : "text-primary font-medium"
+                    : transparent ? "text-white/80 hover:text-white" : "text-foreground/70 hover:text-foreground"
                 )
               }
             >
@@ -71,7 +71,7 @@ export const SiteHeader = () => {
 
         <button
           aria-label="Menu"
-          className={cn("md:hidden p-2 -mr-2 transition-colors", scrolled ? "text-foreground" : "text-white")}
+          className={cn("md:hidden p-2 -mr-2 transition-colors", transparent ? "text-white" : "text-foreground")}
           onClick={() => setOpen((v) => !v)}
         >
           {open ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
