@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { ArrowRight, MapPin, Phone, Mail, Compass, Ruler, FileText, ScrollText, Quote } from "lucide-react";
+import { ArrowRight, MapPin, Phone, Mail, Compass, Ruler, FileText, ScrollText, Quote, ChevronDown, FileText as FileTextIcon } from "lucide-react";
 import heroLand from "@/assets/hero-land.jpg";
 import surveyor from "@/assets/surveyor-equipment.jpg";
 import topo from "@/assets/topo-map.jpg";
@@ -8,6 +8,7 @@ import { FacebookCTA } from "@/components/site/FacebookCTA";
 import { cn } from "@/lib/utils";
 import { Card, CardContent } from "@/components/ui/card";
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 
 const Index = () => {
   return (
@@ -217,6 +218,78 @@ const Index = () => {
             <CarouselPrevious className="hidden md:flex -left-12 border-border bg-card hover:bg-secondary" />
             <CarouselNext className="hidden md:flex -right-12 border-border bg-card hover:bg-secondary" />
           </Carousel>
+        </div>
+      </section>
+
+      {/* FAQ Section */}
+      <section className="container py-20 md:py-28">
+        <div className="max-w-3xl mx-auto">
+          <div className="text-center mb-12">
+            <div className="text-xs uppercase tracking-[0.25em] text-muted-foreground mb-4">Common questions</div>
+            <h2 className="font-serif text-3xl md:text-5xl text-foreground leading-tight text-balance">
+              Frequently asked questions.
+            </h2>
+          </div>
+          <Accordion type="single" collapsible className="w-full">
+            {[
+              {
+                q: "How long does a typical survey take?",
+                a: "Most residential surveys are completed within 3-7 days, depending on lot size and complexity. Subdivision and consolidation surveys may take 2-4 weeks due to additional documentation and agency coordination requirements."
+              },
+              {
+                q: "What documents do I need to provide?",
+                a: "Typically we need a copy of your land title (TCT/OCT), tax declaration, and any existing survey plans. For inheritance-related surveys, we may also require extra judicial settlement documents or court orders."
+              },
+              {
+                q: "Do you handle government filing?",
+                a: "Yes, we prepare all necessary plans and documents for DENR, LRA, and local government submissions. We also coordinate with adjoining landowners and barangay offices as required by the process."
+              },
+              {
+                q: "What areas do you service?",
+                a: "We primarily serve Mobo, Masbate City, and surrounding municipalities in Masbate province. For larger projects, we can also accommodate clients in nearby provinces."
+              },
+              {
+                q: "Is a down payment required?",
+                a: "Yes, a down payment is required to secure your booking and begin the survey process. The amount varies depending on the service type and project scope. Contact us for a detailed quotation."
+              },
+            ].map((item, i) => (
+              <AccordionItem key={i} value={`item-${i}`} className="border-b border-border">
+                <AccordionTrigger className="text-left font-medium text-foreground hover:no-underline py-4">
+                  {item.q}
+                </AccordionTrigger>
+                <AccordionContent className="text-muted-foreground leading-relaxed pb-4">
+                  {item.a}
+                </AccordionContent>
+              </AccordionItem>
+            ))}
+          </Accordion>
+        </div>
+      </section>
+
+      {/* Terms & Conditions */}
+      <section className="bg-secondary/30 border-y border-border">
+        <div className="container py-16 md:py-20">
+          <div className="max-w-3xl mx-auto">
+            <div className="flex items-center gap-3 mb-6">
+              <FileTextIcon className="h-6 w-6 text-primary" />
+              <h2 className="font-serif text-2xl md:text-3xl text-foreground">Terms & Conditions</h2>
+            </div>
+            <div className="prose prose-sm max-w-none text-muted-foreground">
+              <p className="mb-4">
+                By engaging Rañola Surveying Services for any surveying work, you agree to the following terms:
+              </p>
+              <ul className="list-disc pl-5 space-y-2 mb-4">
+                <li><strong>Down Payment Required:</strong> A non-refundable down payment is required before field work begins. The amount will be specified in your quotation.</li>
+                <li><strong>Document Accuracy:</strong> Clients are responsible for providing accurate land titles, tax declarations, and other required documents. Delays caused by incomplete or incorrect documents are not our responsibility.</li>
+                <li><strong>Third-Party Delays:</strong> We are not liable for delays caused by government agencies (DENR, LRA, LGU), adjoining landowners, or other third parties.</li>
+                <li><strong>Payment Terms:</strong> Full payment is due upon delivery of signed plans, unless otherwise agreed in writing.</li>
+                <li><strong>Revisions:</strong> Minor revisions due to our error are included. Major changes requested by the client after plan completion may incur additional charges.</li>
+              </ul>
+              <p>
+                For questions about these terms, please contact us before proceeding with your survey booking.
+              </p>
+            </div>
+          </div>
         </div>
       </section>
 
