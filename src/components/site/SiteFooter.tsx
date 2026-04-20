@@ -66,7 +66,11 @@ export const SiteFooter = () => {
       <div className="border-t border-primary-foreground/10">
         <div className="container py-6 flex flex-col md:flex-row gap-2 items-center justify-between text-xs text-primary-foreground/50">
           <p>© {new Date().getFullYear()} Rañola Surveying Services. All rights reserved.</p>
-          <p>Mobo, Masbate · Philippines</p>
+          <div className="flex items-center gap-4">
+            <Link to="/faq" className="hover:text-primary-foreground transition-colors">FAQ</Link>
+            <Link to="/terms" className="hover:text-primary-foreground transition-colors">Terms</Link>
+            <span>Mobo, Masbate · Philippines</span>
+          </div>
         </div>
       </div>
     </footer>
