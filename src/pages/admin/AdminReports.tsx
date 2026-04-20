@@ -1,32 +1,41 @@
 import { useMemo, useState } from "react";
-import { format, startOfDay, endOfDay, startOfWeek, endOfWeek, startOfMonth, endOfMonth, startOfYear, endOfYear, isWithinInterval } from "date-fns";
+import { format, startOfDay, endOfDay, startOfMonth, endOfMonth, startOfYear, endOfYear, isWithinInterval, subDays, subMonths } from "date-fns";
 import { CalendarIcon, FileDown, FileSpreadsheet } from "lucide-react";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import * as XLSX from "xlsx";
 import { Card } from "@/components/ui/card";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
 import { listSales, listExpenses } from "@/lib/adminStore";
 import { cn } from "@/lib/utils";
+import type { DateRange } from "react-day-picker";
 
-type Range = "day" | "week" | "month" | "year";
 const peso = (n: number) => `₱${n.toLocaleString("en-PH", { minimumFractionDigits: 2 })}`;
 
-const AdminReports = () => {
-  const [range, setRange] = useState<Range>("month");
-  const [anchor, setAnchor] = useState<Date>(new Date());
+type Preset = { label: string; getRange: () => { from: Date; to: Date } };
 
-  const interval = useMemo(() => {
-    switch (range) {
-      case "day": return { start: startOfDay(anchor), end: endOfDay(anchor) };
-      case "week": return { start: startOfWeek(anchor), end: endOfWeek(anchor) };
-      case "month": return { start: startOfMonth(anchor), end: endOfMonth(anchor) };
-      case "year": return { start: startOfYear(anchor), end: endOfYear(anchor) };
-    }
-  }, [range, anchor]);
+const PRESETS: Preset[] = [
+  { label: "Today", getRange: () => ({ from: startOfDay(new Date()), to: endOfDay(new Date()) }) },
+  { label: "Last 7 days", getRange: () => ({ from: startOfDay(subDays(new Date(), 6)), to: endOfDay(new Date()) }) },
+  { label: "Last 30 days", getRange: () => ({ from: startOfDay(subDays(new Date(), 29)), to: endOfDay(new Date()) }) },
+  { label: "This month", getRange: () => ({ from: startOfMonth(new Date()), to: endOfMonth(new Date()) }) },
+  { label: "Last month", getRange: () => { const d = subMonths(new Date(), 1); return { from: startOfMonth(d), to: endOfMonth(d) }; } },
+  { label: "This year", getRange: () => ({ from: startOfYear(new Date()), to: endOfYear(new Date()) }) },
+  { label: "Last year", getRange: () => { const d = subMonths(new Date(), 12); return { from: startOfYear(d), to: endOfYear(d) }; } },
+];
+
+const AdminReports = () => {
+  const [range, setRange] = useState<DateRange>({
+    from: startOfMonth(new Date()),
+    to: endOfMonth(new Date()),
+  });
+
+  const interval = useMemo(() => ({
+    start: startOfDay(range.from ?? new Date()),
+    end: endOfDay(range.to ?? range.from ?? new Date()),
+  }), [range]);
 
   const sales = listSales().filter((s) => isWithinInterval(new Date(s.surveyingDay), interval));
   const expenses = listExpenses().filter((e) => isWithinInterval(new Date(e.date), interval));
@@ -35,6 +44,26 @@ const AdminReports = () => {
   const profit = revenue - expenseTotal;
 
   const periodLabel = `${format(interval.start, "MMM d, yyyy")} – ${format(interval.end, "MMM d, yyyy")}`;
+
+  const activePresetLabel = useMemo(() => {
+    if (!range.from || !range.to) return null;
+    for (const p of PRESETS) {
+      const r = p.getRange();
+      if (
+        startOfDay(r.from).getTime() === startOfDay(range.from).getTime() &&
+        endOfDay(r.to).getTime() === endOfDay(range.to).getTime()
+      ) return p.label;
+    }
+    return null;
+  }, [range]);
+
+  const rangeLabel = range.from
+    ? range.to && startOfDay(range.to).getTime() !== startOfDay(range.from).getTime()
+      ? `${format(range.from, "MMM d, yyyy")} – ${format(range.to, "MMM d, yyyy")}`
+      : format(range.from, "MMM d, yyyy")
+    : "Pick a range";
+
+  const fileSlug = `${format(interval.start, "yyyy-MM-dd")}_to_${format(interval.end, "yyyy-MM-dd")}`;
 
   const exportPdf = () => {
     const doc = new jsPDF();
@@ -82,7 +111,7 @@ const AdminReports = () => {
       margin: { top: 24 },
     });
 
-    doc.save(`Ranola_Report_${range}_${format(anchor, "yyyy-MM-dd")}.pdf`);
+    doc.save(`Ranola_Report_${fileSlug}.pdf`);
   };
 
   const exportXlsx = () => {
@@ -123,7 +152,7 @@ const AdminReports = () => {
     })));
     XLSX.utils.book_append_sheet(wb, ws3, "Expenses");
 
-    XLSX.writeFile(wb, `Ranola_Report_${range}_${format(anchor, "yyyy-MM-dd")}.xlsx`);
+    XLSX.writeFile(wb, `Ranola_Report_${fileSlug}.xlsx`);
   };
 
   return (
@@ -143,28 +172,52 @@ const AdminReports = () => {
         </div>
       </div>
 
-      <div className="flex flex-wrap gap-2">
-        <Tabs value={range} onValueChange={(v) => setRange(v as Range)}>
-          <TabsList>
-            <TabsTrigger value="day">Day</TabsTrigger>
-            <TabsTrigger value="week">Week</TabsTrigger>
-            <TabsTrigger value="month">Month</TabsTrigger>
-            <TabsTrigger value="year">Year</TabsTrigger>
-          </TabsList>
-        </Tabs>
+      <div>
         <Popover>
           <PopoverTrigger asChild>
-            <Button variant="outline" className="gap-2">
-              <CalendarIcon className="h-4 w-4" /> {format(anchor, "PPP")}
+            <Button variant="outline" className="gap-3 justify-start min-w-[260px] h-12 px-4">
+              <CalendarIcon className="h-4 w-4 text-primary shrink-0" />
+              <div className="flex flex-col items-start leading-tight">
+                <span className="text-[10px] uppercase tracking-wider text-muted-foreground">{activePresetLabel ?? "Custom range"}</span>
+                <span className="text-sm font-medium truncate">{rangeLabel}</span>
+              </div>
             </Button>
           </PopoverTrigger>
-          <PopoverContent className="w-auto p-0" align="start">
-            <Calendar mode="single" selected={anchor} onSelect={(d) => d && setAnchor(d)} initialFocus className={cn("p-3 pointer-events-auto")} />
+          <PopoverContent className="w-auto p-0 max-w-[calc(100vw-2rem)]" align="start">
+            <div className="flex flex-col sm:flex-row">
+              <div className="border-b sm:border-b-0 sm:border-r border-border p-2 flex sm:flex-col gap-1 overflow-x-auto sm:overflow-visible sm:min-w-[150px] bg-muted/30">
+                <div className="hidden sm:block text-[10px] uppercase tracking-wider text-muted-foreground px-3 pt-2 pb-1">Quick select</div>
+                {PRESETS.map((p) => {
+                  const isActive = activePresetLabel === p.label;
+                  return (
+                    <button
+                      key={p.label}
+                      onClick={() => setRange(p.getRange())}
+                      className={cn(
+                        "text-left text-sm px-3 py-1.5 rounded-sm whitespace-nowrap transition-colors",
+                        isActive
+                          ? "bg-primary text-primary-foreground"
+                          : "text-foreground/80 hover:bg-secondary hover:text-foreground"
+                      )}
+                    >
+                      {p.label}
+                    </button>
+                  );
+                })}
+              </div>
+              <Calendar
+                mode="range"
+                selected={range}
+                onSelect={(r) => r && setRange(r)}
+                numberOfMonths={1}
+                defaultMonth={range.from}
+                initialFocus
+                className={cn("p-3 pointer-events-auto")}
+              />
+            </div>
           </PopoverContent>
         </Popover>
       </div>
-
-      <div className="text-xs text-muted-foreground">{periodLabel}</div>
 
       <div className="grid sm:grid-cols-3 gap-4">
         <Card className="p-5">
