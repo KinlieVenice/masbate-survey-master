@@ -226,7 +226,7 @@ const AdminSaleDetail = () => {
               {sale.checklist.map((done, i) => (
                 <li key={i} className="flex items-start gap-2">
                   <span className={`mt-1 h-2 w-2 rounded-full shrink-0 ${done ? "bg-primary" : "bg-border"}`} />
-                  <span className={done ? "text-foreground" : "text-muted-foreground line-through opacity-60"}>
+                  <span className={done ? "text-muted-foreground line-through opacity-60" : "text-foreground"}>
                     {i + 1}. {REQ_LABELS[i]}
                   </span>
                 </li>
