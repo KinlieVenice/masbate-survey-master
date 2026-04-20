@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { ArrowRight, MapPin, Phone, Mail, Compass, Ruler, FileText, ScrollText, Quote } from "lucide-react";
+import { ArrowRight, MapPin, Phone, Mail, Compass, Ruler, FileText, ScrollText, Quote, ChevronDown, FileText as FileTextIcon } from "lucide-react";
 import heroLand from "@/assets/hero-land.jpg";
 import surveyor from "@/assets/surveyor-equipment.jpg";
 import topo from "@/assets/topo-map.jpg";
@@ -8,6 +8,7 @@ import { FacebookCTA } from "@/components/site/FacebookCTA";
 import { cn } from "@/lib/utils";
 import { Card, CardContent } from "@/components/ui/card";
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 
 const Index = () => {
   return (
