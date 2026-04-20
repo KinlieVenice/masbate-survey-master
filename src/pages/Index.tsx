@@ -107,11 +107,19 @@ const Index = () => {
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-px bg-border rounded-sm overflow-hidden shadow-soft">
             {SERVICES.map((s, i) => {
               const Icon = [Compass, Ruler, FileText, ScrollText, Compass, Ruler, FileText][i];
+              const isLast = i === SERVICES.length - 1;
+              const smLeftover = SERVICES.length % 2 === 1;
+              const lgLeftover = SERVICES.length % 3;
+              const spanClass = cn(
+                isLast && smLeftover && "sm:col-span-2",
+                isLast && lgLeftover === 1 && "lg:col-span-3",
+                isLast && lgLeftover === 2 && "lg:col-span-1 sm:col-span-2 lg:col-start-2",
+              );
               return (
                 <Link
                   key={s.slug}
                   to={`/services/${s.slug}`}
-                  className="group bg-card p-7 md:p-9 hover:bg-secondary/40 transition-colors duration-300 ease-natural relative"
+                  className={cn("group bg-card p-7 md:p-9 hover:bg-secondary/40 transition-colors duration-300 ease-natural relative", spanClass)}
                 >
                   <Icon className="h-6 w-6 text-primary/70 mb-6" strokeWidth={1.4} />
                   <h3 className="font-serif text-xl md:text-2xl text-foreground mb-3">{s.name}</h3>
