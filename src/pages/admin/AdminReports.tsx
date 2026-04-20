@@ -69,7 +69,7 @@ const AdminReports = () => {
       body: sales.map((s) => [format(new Date(s.surveyingDay), "MMM d, yyyy"), s.clientName, peso(s.totalAmount), peso(s.paidAmount), s.status]),
       theme: "grid",
       headStyles: { fillColor: [27, 67, 50] },
-      didDrawPage: (d) => doc.text("Sales", 14, d.cursor!.y - 4),
+      didDrawPage: (d) => { doc.text("Sales", 14, (d.cursor?.y ?? 30) - 4); },
       margin: { top: 24 },
     });
 
@@ -78,7 +78,7 @@ const AdminReports = () => {
       body: expenses.map((e) => [format(new Date(e.date), "MMM d, yyyy"), e.name, e.category, peso(e.amount)]),
       theme: "grid",
       headStyles: { fillColor: [27, 67, 50] },
-      didDrawPage: (d) => doc.text("Expenses", 14, d.cursor!.y - 4),
+      didDrawPage: (d) => { doc.text("Expenses", 14, (d.cursor?.y ?? 30) - 4); },
       margin: { top: 24 },
     });
 

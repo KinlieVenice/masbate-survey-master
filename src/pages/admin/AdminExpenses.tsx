@@ -156,7 +156,7 @@ const ExpenseFormDialog = ({ open, onOpenChange, expense, onSaved }: { open: boo
   const submit = () => {
     try {
       const v = schema.parse({ name, description, category, amount: Number(amount) || 0 });
-      upsertExpense({ id: expense?.id, ...v, date });
+      upsertExpense({ id: expense?.id, name: v.name, description: v.description, category: v.category, amount: v.amount, date });
       toast.success(expense ? "Expense updated" : "Expense added");
       onSaved();
       onOpenChange(false);
