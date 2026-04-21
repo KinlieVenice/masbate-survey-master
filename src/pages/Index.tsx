@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import { ArrowRight, MapPin, Phone, Mail, Compass, Ruler, FileText, ScrollText, Pencil, ThumbsUpIcon, HandshakeIcon, Quote, ChevronDown, FileText as FileTextIcon } from "lucide-react";
-import heroLand from "@/assets/hero.png";
+import heroLand from "@/assets/hero-banner.png";
 import surveyor from "@/assets/ranola-building.jpeg";
 import topo from "@/assets/topo-map.jpg";
 import { ADDRESS, EMAIL, PHONE, SERVICES } from "@/lib/services";
@@ -52,7 +52,7 @@ const Index = () => {
 
       {/* Trust strip */}
       <section className="border-b border-border bg-secondary/40">
-        <div className="container py-6 grid grid-cols-2 md:grid-cols-4 gap-6 text-center md:text-left">
+        <div className="container py-6 grid grid-cols-2 md:grid-cols-5 gap-6 text-center md:text-left">
           {[
             { k: "6+", v: "Years field experience" },
             { k: "1,500+", v: "Lots surveyed" },
