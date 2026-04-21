@@ -63,7 +63,16 @@ const load = <T,>(key: string, fallback: T): T => {
     return fallback;
   }
 };
-const save = (key: string, value: unknown) => localStorage.setItem(key, JSON.stringify(value));
+const save = (key: string, value: unknown) => {
+  try {
+    localStorage.setItem(key, JSON.stringify(value));
+  } catch (err) {
+    if (err instanceof DOMException && (err.name === "QuotaExceededError" || err.code === 22)) {
+      throw new Error("Storage full — too many large files. Remove some files or use smaller ones.");
+    }
+    throw err;
+  }
+};
 
 export const computeStatus = (total: number, paid: number): SaleStatus => {
   if (paid <= 0) return "Unpaid";
