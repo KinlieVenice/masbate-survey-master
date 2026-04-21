@@ -19,6 +19,31 @@ const fileToDataUrl = (file: File): Promise<string> =>
     r.readAsDataURL(file);
   });
 
+const MAX_DIM = 1600;
+const compressImage = (file: File): Promise<string> =>
+  new Promise(async (resolve, reject) => {
+    try {
+      const dataUrl = await fileToDataUrl(file);
+      if (!file.type.startsWith("image/") || file.type === "image/gif") return resolve(dataUrl);
+      const img = new Image();
+      img.onload = () => {
+        let { width, height } = img;
+        if (width > MAX_DIM || height > MAX_DIM) {
+          const s = Math.min(MAX_DIM / width, MAX_DIM / height);
+          width = Math.round(width * s); height = Math.round(height * s);
+        }
+        const c = document.createElement("canvas");
+        c.width = width; c.height = height;
+        const ctx = c.getContext("2d");
+        if (!ctx) return resolve(dataUrl);
+        ctx.drawImage(img, 0, 0, width, height);
+        try { resolve(c.toDataURL("image/jpeg", 0.78)); } catch { resolve(dataUrl); }
+      };
+      img.onerror = () => resolve(dataUrl);
+      img.src = dataUrl;
+    } catch (e) { reject(e); }
+  });
+
 const AdminSaleDetail = () => {
   const { id } = useParams();
   const nav = useNavigate();
