@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import { ArrowRight, MapPin, Phone, Mail, Compass, Ruler, FileText, ScrollText, Pencil, ThumbsUpIcon, HandshakeIcon, Quote, ChevronDown, FileText as FileTextIcon } from "lucide-react";
-import heroLand from "@/assets/hero-banner.png";
+import heroLand from "@/assets/main.jpg";
 import surveyor from "@/assets/ranola-building.jpeg";
 import topo from "@/assets/topo-map.jpg";
 import { ADDRESS, EMAIL, PHONE, SERVICES } from "@/lib/services";
