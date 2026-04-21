@@ -128,9 +128,13 @@ const About = () => {
       </section>
 
       {/* CTA */}
-      <section className="container pb-20 md:pb-28 text-center border-t border-border pt-16 md:pt-20">
-        <h2 className="font-serif text-3xl md:text-4xl mb-6 text-balance">Talk to us about your land.</h2>
-        <FacebookCTA />
+      <section className="relative overflow-hidden">
+        <img src={surveyor} alt="" className="absolute inset-0 h-full w-full object-cover opacity-15" loading="lazy" />
+        <div className="absolute inset-0 bg-gradient-to-b from-primary/90 via-primary/95 to-primary" />
+        <div className="container relative py-20 md:py-28 text-center">
+          <h2 className="font-serif text-3xl md:text-4xl mb-6 text-balance text-primary-foreground">Talk to us about your land.</h2>
+          <FacebookCTA variant="light" />
+        </div>
       </section>
     </>
   );
