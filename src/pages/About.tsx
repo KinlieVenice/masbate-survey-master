@@ -103,7 +103,7 @@ const About = () => {
           </div>
           <div className="md:col-span-7">
             <figure className="flex items-start gap-6">
-              <div className="relative h-28 w-28 sm:h-32 sm:w-32 shrink-0 rounded-sm overflow-hidden bg-secondary">
+              <div className="relative h-36 w-36 sm:h-44 sm:w-44 shrink-0 rounded-sm overflow-hidden bg-secondary">
                 <img
                   src={teamRam}
                   alt="Ram Cedrick A. Rañola"
@@ -119,7 +119,7 @@ const About = () => {
                   Facebook Admin Manager · Secretary
                 </p>
                 <p className="text-sm text-muted-foreground leading-relaxed max-w-sm">
-                  Handles client communications and coordinates appointments to ensure smooth service delivery.
+                  Supports the practice by managing inquiries and keeping operations organized behind the scenes.
                 </p>
               </figcaption>
             </figure>
@@ -128,9 +128,13 @@ const About = () => {
       </section>
 
       {/* CTA */}
-      <section className="container pb-20 md:pb-28 text-center border-t border-border pt-16 md:pt-20">
-        <h2 className="font-serif text-3xl md:text-4xl mb-6 text-balance">Talk to us about your land.</h2>
-        <FacebookCTA />
+      <section className="relative overflow-hidden">
+        <img src={surveyor} alt="" className="absolute inset-0 h-full w-full object-cover opacity-15" loading="lazy" />
+        <div className="absolute inset-0 bg-gradient-to-b from-primary/90 via-primary/95 to-primary" />
+        <div className="container relative py-20 md:py-28 text-center">
+          <h2 className="font-serif text-3xl md:text-4xl mb-6 text-balance text-primary-foreground">Talk to us about your land.</h2>
+          <FacebookCTA variant="light" />
+        </div>
       </section>
     </>
   );
