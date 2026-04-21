@@ -229,8 +229,8 @@ const Index = () => {
 
       {/* CTA */}
       <section className="relative overflow-hidden">
-        <img src={topo} alt="" className="absolute inset-0 h-full w-full object-cover opacity-15" loading="lazy" />
-        <div className="absolute inset-0 bg-gradient-forest" />
+        <img src={surveyor} alt="" className="absolute inset-0 h-full w-full object-cover opacity-20" loading="lazy" />
+        <div className="absolute inset-0 bg-gradient-to-b from-primary/90 via-primary/95 to-primary" />
         <div className="container relative py-20 md:py-28 grid md:grid-cols-2 gap-12 items-center">
           <div>
             <h2 className="font-serif text-primary-foreground text-3xl md:text-5xl leading-tight mb-6 text-balance">
