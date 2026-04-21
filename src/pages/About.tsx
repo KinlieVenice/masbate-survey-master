@@ -50,8 +50,8 @@ const About = () => {
             Meet the engineer behind every plan.
           </h2>
         </div>
-        <div className="grid md:grid-cols-12 gap-10 md:gap-16 items-center">
-          <figure className="md:col-span-7">
+        <div className="grid md:grid-cols-12 gap-8 md:gap-12 items-center">
+          <figure className="md:col-span-5 max-w-xs sm:max-w-sm md:max-w-none mx-auto w-full">
             <div className="relative aspect-[4/5] rounded-sm overflow-hidden bg-secondary shadow-deep">
               <img
                 src={teamRacel}
@@ -61,7 +61,7 @@ const About = () => {
               />
             </div>
           </figure>
-          <div className="md:col-span-5 space-y-5">
+          <div className="md:col-span-7 space-y-5">
             <div className="text-xs uppercase tracking-[0.25em] text-primary">Owner · Geodetic Engineer</div>
             <h3 className="font-serif text-3xl md:text-4xl text-foreground leading-tight text-balance">
               Racel Claire A. Rañola
@@ -82,8 +82,8 @@ const About = () => {
             Working alongside Engr. Rañola.
           </h2>
         </div>
-        <div className="grid sm:grid-cols-2 gap-10 md:gap-12 max-w-2xl">
-          <figure className="space-y-4">
+        <div className="grid sm:grid-cols-2 gap-8 max-w-md">
+          <figure className="space-y-4 max-w-[180px]">
             <div className="relative aspect-square rounded-sm overflow-hidden bg-secondary">
               <img
                 src={teamRam}
@@ -93,8 +93,8 @@ const About = () => {
               />
             </div>
             <figcaption>
-              <h3 className="font-serif text-lg text-foreground">Ram Cedrick A. Rañola</h3>
-              <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground mt-1.5">
+              <h3 className="font-serif text-base text-foreground">Ram Cedrick A. Rañola</h3>
+              <p className="text-[11px] uppercase tracking-[0.2em] text-muted-foreground mt-1.5">
                 Facebook Admin Manager · Secretary
               </p>
             </figcaption>
