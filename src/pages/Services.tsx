@@ -3,6 +3,7 @@ import { ArrowRight } from "lucide-react";
 import { SERVICES } from "@/lib/services";
 import { FacebookCTA } from "@/components/site/FacebookCTA";
 import { cn } from "@/lib/utils";
+import topo from "@/assets/topo-map.jpg";
 
 const Services = () => {
   return (
@@ -50,9 +51,14 @@ const Services = () => {
           ))}
         </div>
 
-        <div className="mt-16 text-center">
-          <p className="text-muted-foreground mb-6">Not sure which survey you need?</p>
-          <FacebookCTA label="Ask us on Facebook" />
+      </section>
+
+      <section className="relative overflow-hidden">
+        <img src={topo} alt="" className="absolute inset-0 h-full w-full object-cover opacity-15" loading="lazy" />
+        <div className="absolute inset-0 bg-gradient-to-b from-primary/90 via-primary/95 to-primary" />
+        <div className="container relative py-20 md:py-28 text-center">
+          <p className="text-primary-foreground/75 mb-6">Not sure which survey you need?</p>
+          <FacebookCTA variant="light" label="Ask us on Facebook" />
         </div>
       </section>
     </>
