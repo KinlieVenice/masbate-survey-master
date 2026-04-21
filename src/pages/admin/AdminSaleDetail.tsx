@@ -70,8 +70,18 @@ const AdminSaleDetail = () => {
     if (!list || list.length === 0) return;
     setBusy(true);
     try {
+      const MAX_FILES = 15;
+      const remaining = MAX_FILES - sale.files.length;
+      if (remaining <= 0) {
+        toast.error(`Maximum ${MAX_FILES} files per sale`);
+        return;
+      }
+      const incoming = Array.from(list).slice(0, remaining);
+      if (list.length > remaining) {
+        toast.error(`Only ${remaining} more file${remaining > 1 ? "s" : ""} allowed (max ${MAX_FILES})`);
+      }
       const next: SaleFile[] = [];
-      for (const f of Array.from(list)) {
+      for (const f of incoming) {
         if (f.size > 8 * 1024 * 1024) {
           toast.error(`${f.name} skipped — over 8MB`);
           continue;
@@ -79,8 +89,8 @@ const AdminSaleDetail = () => {
         next.push({
           id: Math.random().toString(36).slice(2, 10),
           name: f.name,
-          type: f.type || "application/octet-stream",
-          dataUrl: await fileToDataUrl(f),
+          type: f.type.startsWith("image/") && f.type !== "image/gif" ? "image/jpeg" : (f.type || "application/octet-stream"),
+          dataUrl: await compressImage(f),
         });
       }
       upsertSale({
@@ -95,6 +105,8 @@ const AdminSaleDetail = () => {
       });
       toast.success(`${next.length} file${next.length === 1 ? "" : "s"} uploaded`);
       setVersion((v) => v + 1);
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Upload failed");
     } finally {
       setBusy(false);
     }
