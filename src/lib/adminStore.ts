@@ -170,7 +170,15 @@ export const deleteExpense = (id: string) => {
 };
 
 // Auth
-export const getUsers = (): AdminUser[] => load<AdminUser[]>(USERS_KEY, []);
+export const DEFAULT_ADMIN: AdminUser = { email: "admin@ranola.ph", password: "ranola123", name: "Rañola Admin" };
+export const getUsers = (): AdminUser[] => {
+  const users = load<AdminUser[]>(USERS_KEY, []);
+  if (!users.some((u) => u.email.toLowerCase() === DEFAULT_ADMIN.email.toLowerCase())) {
+    users.push(DEFAULT_ADMIN);
+    save(USERS_KEY, users);
+  }
+  return users;
+};
 export const registerUser = (u: AdminUser) => {
   const users = getUsers();
   if (users.some((x) => x.email.toLowerCase() === u.email.toLowerCase())) {

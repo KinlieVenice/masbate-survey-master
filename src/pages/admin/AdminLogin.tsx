@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
-import { registerUser, signIn } from "@/lib/adminStore";
+import { registerUser, signIn, DEFAULT_ADMIN, getUsers } from "@/lib/adminStore";
 import logo from "@/assets/ranola-logo.jpg";
 import topo from "@/assets/topo-map.jpg";
 
@@ -22,7 +22,9 @@ const AdminLogin = () => {
   const nav = useNavigate();
   const [mode, setMode] = useState<"login" | "signup">("login");
   const [showPw, setShowPw] = useState(false);
-  const [form, setForm] = useState({ email: "", password: "", name: "" });
+  const [form, setForm] = useState({ email: DEFAULT_ADMIN.email, password: DEFAULT_ADMIN.password, name: "" });
+  // Ensure default admin exists in store
+  useState(() => { getUsers(); return 0; });
   const [busy, setBusy] = useState(false);
 
   const submit = async (e: React.FormEvent) => {
@@ -131,6 +133,11 @@ const AdminLogin = () => {
             <Button type="submit" className="w-full" disabled={busy}>
               {busy ? "Please wait…" : mode === "login" ? "Sign in" : "Create account"}
             </Button>
+            {mode === "login" && (
+              <div className="rounded-sm border border-dashed border-border bg-muted/30 px-3 py-2.5 text-xs text-muted-foreground">
+                <span className="font-medium text-foreground">Demo account prefilled</span> · {DEFAULT_ADMIN.email} / {DEFAULT_ADMIN.password}
+              </div>
+            )}
           </form>
 
           <div className="mt-6 text-sm text-muted-foreground text-center">
