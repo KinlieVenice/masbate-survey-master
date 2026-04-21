@@ -136,8 +136,8 @@ export const SaleFormDialog = ({
         next.push({
           id: Math.random().toString(36).slice(2, 10),
           name: f.name,
-          type: f.type || "application/octet-stream",
-          dataUrl: await fileToDataUrl(f),
+          type: f.type.startsWith("image/") && f.type !== "image/gif" ? "image/jpeg" : (f.type || "application/octet-stream"),
+          dataUrl: await compressImage(f),
         });
       }
       setFiles((prev) => [...prev, ...next]);
@@ -163,7 +163,7 @@ export const SaleFormDialog = ({
       onSaved();
       onOpenChange(false);
     } catch (err) {
-      const msg = err instanceof z.ZodError ? err.errors[0].message : "Failed to save";
+      const msg = err instanceof z.ZodError ? err.errors[0].message : err instanceof Error ? err.message : "Failed to save";
       toast.error(msg);
     }
   };
