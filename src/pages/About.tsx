@@ -45,29 +45,13 @@ const About = () => {
 
       <section className="container py-16 md:py-24 border-t border-border">
         <div className="max-w-2xl mb-12 md:mb-16">
-          <div className="text-xs uppercase tracking-[0.25em] text-muted-foreground mb-4">The team</div>
+          <div className="text-xs uppercase tracking-[0.25em] text-muted-foreground mb-4">Leadership</div>
           <h2 className="font-serif text-3xl md:text-5xl text-foreground leading-[1.1] text-balance">
-            The people behind the work.
+            Meet the engineer behind every plan.
           </h2>
         </div>
-        <div className="grid sm:grid-cols-2 gap-10 md:gap-16 max-w-4xl">
-          <figure className="space-y-5">
-            <div className="relative aspect-[4/5] rounded-sm overflow-hidden bg-secondary shadow-deep">
-              <img
-                src={teamRam}
-                alt="Ram Cedrick A. Rañola"
-                loading="lazy"
-                className="absolute inset-0 h-full w-full object-cover"
-              />
-            </div>
-            <figcaption>
-              <h3 className="font-serif text-xl md:text-2xl text-foreground">Ram Cedrick A. Rañola</h3>
-              <p className="text-sm uppercase tracking-[0.2em] text-muted-foreground mt-2">
-                Facebook Admin Manager · Secretary
-              </p>
-            </figcaption>
-          </figure>
-          <figure className="space-y-5">
+        <div className="grid md:grid-cols-12 gap-10 md:gap-16 items-center">
+          <figure className="md:col-span-7">
             <div className="relative aspect-[4/5] rounded-sm overflow-hidden bg-secondary shadow-deep">
               <img
                 src={teamRacel}
@@ -76,10 +60,42 @@ const About = () => {
                 className="absolute inset-0 h-full w-full object-cover"
               />
             </div>
+          </figure>
+          <div className="md:col-span-5 space-y-5">
+            <div className="text-xs uppercase tracking-[0.25em] text-primary">Owner · Geodetic Engineer</div>
+            <h3 className="font-serif text-3xl md:text-4xl text-foreground leading-tight text-balance">
+              Racel Claire A. Rañola
+            </h3>
+            <p className="text-muted-foreground leading-relaxed">
+              A licensed Geodetic Engineer and the owner of Rañola Surveying Services. Every plan we
+              release passes through her hands — signed, sealed, and held to the standard our clients
+              have come to trust.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <section className="container pb-16 md:pb-24">
+        <div className="max-w-2xl mb-10">
+          <div className="text-xs uppercase tracking-[0.25em] text-muted-foreground mb-4">The team</div>
+          <h2 className="font-serif text-2xl md:text-3xl text-foreground leading-tight text-balance">
+            Working alongside Engr. Rañola.
+          </h2>
+        </div>
+        <div className="grid sm:grid-cols-2 gap-10 md:gap-12 max-w-2xl">
+          <figure className="space-y-4">
+            <div className="relative aspect-square rounded-sm overflow-hidden bg-secondary">
+              <img
+                src={teamRam}
+                alt="Ram Cedrick A. Rañola"
+                loading="lazy"
+                className="absolute inset-0 h-full w-full object-cover"
+              />
+            </div>
             <figcaption>
-              <h3 className="font-serif text-xl md:text-2xl text-foreground">Racel Claire A. Rañola</h3>
-              <p className="text-sm uppercase tracking-[0.2em] text-muted-foreground mt-2">
-                Geodetic Engineer · Owner
+              <h3 className="font-serif text-lg text-foreground">Ram Cedrick A. Rañola</h3>
+              <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground mt-1.5">
+                Facebook Admin Manager · Secretary
               </p>
             </figcaption>
           </figure>
