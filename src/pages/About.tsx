@@ -1,4 +1,6 @@
 import surveyor from "@/assets/ranola-building.jpeg";
+import teamRam from "@/assets/team-ram.png";
+import teamRacel from "@/assets/team-racel.png";
 import { FacebookCTA } from "@/components/site/FacebookCTA";
 
 const About = () => {
@@ -38,6 +40,49 @@ const About = () => {
             Every plan we release is signed and sealed by a licensed Geodetic Engineer. The
             measurements are honest, the documents are complete, and the work holds up to scrutiny.
           </p>
+        </div>
+      </section>
+
+      <section className="container py-16 md:py-24 border-t border-border">
+        <div className="max-w-2xl mb-12 md:mb-16">
+          <div className="text-xs uppercase tracking-[0.25em] text-muted-foreground mb-4">The team</div>
+          <h2 className="font-serif text-3xl md:text-5xl text-foreground leading-[1.1] text-balance">
+            The people behind the work.
+          </h2>
+        </div>
+        <div className="grid sm:grid-cols-2 gap-10 md:gap-16 max-w-4xl">
+          <figure className="space-y-5">
+            <div className="relative aspect-[4/5] rounded-sm overflow-hidden bg-secondary shadow-deep">
+              <img
+                src={teamRam}
+                alt="Ram Cedrick A. Rañola"
+                loading="lazy"
+                className="absolute inset-0 h-full w-full object-cover"
+              />
+            </div>
+            <figcaption>
+              <h3 className="font-serif text-xl md:text-2xl text-foreground">Ram Cedrick A. Rañola</h3>
+              <p className="text-sm uppercase tracking-[0.2em] text-muted-foreground mt-2">
+                Facebook Admin Manager · Secretary
+              </p>
+            </figcaption>
+          </figure>
+          <figure className="space-y-5">
+            <div className="relative aspect-[4/5] rounded-sm overflow-hidden bg-secondary shadow-deep">
+              <img
+                src={teamRacel}
+                alt="Racel Claire A. Rañola"
+                loading="lazy"
+                className="absolute inset-0 h-full w-full object-cover"
+              />
+            </div>
+            <figcaption>
+              <h3 className="font-serif text-xl md:text-2xl text-foreground">Racel Claire A. Rañola</h3>
+              <p className="text-sm uppercase tracking-[0.2em] text-muted-foreground mt-2">
+                Geodetic Engineer · Owner
+              </p>
+            </figcaption>
+          </figure>
         </div>
       </section>
 
