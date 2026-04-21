@@ -28,6 +28,45 @@ const fileToDataUrl = (file: File): Promise<string> =>
     r.readAsDataURL(file);
   });
 
+// Downscale large images to keep localStorage usage manageable.
+// Non-images pass through unchanged.
+const MAX_DIM = 1600;
+const JPEG_QUALITY = 0.78;
+const compressImage = (file: File): Promise<string> =>
+  new Promise(async (resolve, reject) => {
+    try {
+      const dataUrl = await fileToDataUrl(file);
+      if (!file.type.startsWith("image/") || file.type === "image/gif") {
+        resolve(dataUrl);
+        return;
+      }
+      const img = new Image();
+      img.onload = () => {
+        let { width, height } = img;
+        if (width > MAX_DIM || height > MAX_DIM) {
+          const scale = Math.min(MAX_DIM / width, MAX_DIM / height);
+          width = Math.round(width * scale);
+          height = Math.round(height * scale);
+        }
+        const canvas = document.createElement("canvas");
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext("2d");
+        if (!ctx) return resolve(dataUrl);
+        ctx.drawImage(img, 0, 0, width, height);
+        try {
+          resolve(canvas.toDataURL("image/jpeg", JPEG_QUALITY));
+        } catch {
+          resolve(dataUrl);
+        }
+      };
+      img.onerror = () => resolve(dataUrl);
+      img.src = dataUrl;
+    } catch (e) {
+      reject(e);
+    }
+  });
+
 export const SaleFormDialog = ({
   open,
   onOpenChange,
