@@ -4,7 +4,7 @@ const FAQ = () => {
   const faqs = [
     {
       q: "How long does a typical survey take?",
-      a: "Most residential surveys are completed within 3-7 days, depending on lot size and complexity. Subdivision and consolidation surveys may take 2-4 weeks due to additional documentation and agency coordination requirements."
+      a: "Most residential surveys are completed within 1 to 2 days, depending on lot size and complexity. Subdivision and consolidation surveys may take 1 to 2 days due to additional documentation and agency coordination requirements."
     },
     {
       q: "What documents do I need to provide?",
@@ -16,15 +16,15 @@ const FAQ = () => {
     },
     {
       q: "What areas do you service?",
-      a: "We primarily serve Mobo, Masbate City, and surrounding municipalities in Masbate province. For larger projects, we can also accommodate clients in nearby provinces."
+      a: "All municipality in Masbate."
     },
     {
       q: "Is a down payment required?",
-      a: "Yes, a down payment is required to secure your booking and begin the survey process. The amount varies depending on the service type and project scope. Contact us for a detailed quotation."
+      a: "Yes, a down payment is required to secure your booking and begin the survey process. The amount varies depending on the service type and project scope. Contact us for a detailed quotation. 50% downpayment for schedule and remaining 50% for full payment if you want to claim your plan."
     },
     {
       q: "What payment methods do you accept?",
-      a: "We accept cash, bank transfers, and GCash. Payment terms and schedules will be outlined in your quotation. Full payment is typically due upon delivery of signed plans."
+      a: "We accept cash, bank transfers, Maya wallet, Palawan Pay, Land bank and GCash. Payment terms and schedules will be outlined in your quotation. Full payment is typically due upon delivery of signed plans."
     },
     {
       q: "Can you help with boundary disputes?",

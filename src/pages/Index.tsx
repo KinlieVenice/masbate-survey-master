@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
-import { ArrowRight, MapPin, Phone, Mail, Compass, Ruler, FileText, ScrollText, Quote, ChevronDown, FileText as FileTextIcon } from "lucide-react";
-import heroLand from "@/assets/aroroy-hills.jpg";
+import { ArrowRight, MapPin, Phone, Mail, Compass, Ruler, FileText, ScrollText, Pencil, ThumbsUpIcon, HandshakeIcon, Quote, ChevronDown, FileText as FileTextIcon } from "lucide-react";
+import heroLand from "@/assets/survey--banner.png";
 import surveyor from "@/assets/ranola-building.jpeg";
 import topo from "@/assets/topo-map.jpg";
 import { ADDRESS, EMAIL, PHONE, SERVICES } from "@/lib/services";
@@ -17,7 +17,7 @@ const Index = () => {
       <section className="relative min-h-[92vh] flex items-end overflow-hidden -mt-16 md:-mt-20">
         <img
           src={heroLand}
-          alt="Aerial view of Philippine farmland and mountains at sunrise"
+          alt="Land Surveying"
           className="absolute inset-0 h-full w-full object-cover"
           width={1920}
           height={1280}
@@ -54,9 +54,10 @@ const Index = () => {
       <section className="border-b border-border bg-secondary/40">
         <div className="container py-6 grid grid-cols-2 md:grid-cols-4 gap-6 text-center md:text-left">
           {[
-            { k: "20+", v: "Years field experience" },
-            { k: "500+", v: "Lots surveyed" },
-            { k: "7", v: "Survey services" },
+            { k: "6+", v: "Years field experience" },
+            { k: "1,500+", v: "Lots surveyed" },
+            { k: "9,800+", v: "Hectares surveyed" },
+            { k: "10", v: "Survey services" },
             { k: "100%", v: "Licensed & sealed" },
           ].map((s) => (
             <div key={s.v}>
@@ -110,7 +111,7 @@ const Index = () => {
           </div>
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-px bg-border rounded-sm overflow-hidden shadow-soft">
             {SERVICES.map((s, i) => {
-              const Icon = [Compass, Ruler, FileText, ScrollText, Compass, Ruler, FileText][i];
+              const Icon = [Compass, Ruler, FileText, ScrollText, Compass, Ruler, Pencil, FileTextIcon, ThumbsUpIcon, HandshakeIcon][i];
               const isLast = i === SERVICES.length - 1;
               const smLeftover = SERVICES.length % 2 === 1;
               const lgLeftover = SERVICES.length % 3;
@@ -164,7 +165,7 @@ const Index = () => {
       <section className="bg-secondary/30 border-y border-border">
         <div className="container py-20 md:py-28">
           <div className="text-center mb-12">
-            <div className="text-xs uppercase tracking-[0.25em] text-muted-foreground mb-4">What clients say</div>
+            <div className="text-xs uppercase tracking-[0.25em] text-muted-foreground mb-4">What clients say from FB Reviews</div>
             <h2 className="font-serif text-3xl md:text-5xl text-foreground leading-tight text-balance">
               Trusted by landowners across Masbate.
             </h2>
@@ -179,24 +180,29 @@ const Index = () => {
             <CarouselContent className="-ml-4">
               {[
                 {
-                  quote: "Rañola Surveying handled our family land subdivision with professionalism. They walked us through every step and made sure all documents were filed correctly.",
-                  name: "Maria Santos",
-                  role: "Landowner, Mobo",
+                  quote: "Sobrang satisfied kami sa relocation survey nila. Akala namin mahirap hanapin ang exact boundary ng lupa namin, pero dahil sa kanilang precise instruments at malinaw na paliwanag, naging smooth lahat.",
+                  name: "Gina Ayala",
+                  role: "Client - Milagros",
                 },
                 {
-                  quote: "Fast and accurate relocation survey. They found our lost property corners and settled a long-standing boundary dispute with our neighbor.",
-                  name: "Roberto Cruz",
-                  role: "Property Developer, Masbate City",
+                  quote: "We hired them for a relocation survey and we were amazed by their accuracy. They explained every corner and boundary clearly, which gave us peace of mind.",
+                  name: "Yesha Reyes",
+                  role: "Client- Balud",
                 },
                 {
-                  quote: "The as-built survey for our commercial building was completed on time and accepted by the city engineer without any revisions needed.",
-                  name: "Elena Reyes",
-                  role: "Business Owner, Mobo",
+                  quote: "Kung gusto mo ng peace of mind sa lupa, sila na ang piliin — tested and proven sa loob ng limang taon",
+                  name: "Aikee Moran",
+                  role: "Client - Baleno",
                 },
                 {
-                  quote: "Professional service from start to finish. They prepared our sketch plan for the bank loan application and everything went smoothly.",
-                  name: "Antonio Garcia",
-                  role: "Farmer, Masbate",
+                  quote: "Lubos kaming nasiyahan sa serbisyong ibinigay nila sa pag-relocate ng aming lupa. Tumpak at malinaw ang kanilang sukat at paliwanag.",
+                  name: "Jenica Ann Macaraeg",
+                  role: "Client - Cataingan",
+                },
+                {
+                  quote: "From relocation to subdivision, lahat ginawa nila nang maayos. Walang stress, walang confusion, at malinaw ang bawat gawa.",
+                  name: "Alianna Torecelino",
+                  role: "Client – Masbate City",
                 },
               ].map((t, i) => (
                 <CarouselItem key={i} className="pl-4 md:basis-1/2 lg:basis-1/2">
@@ -231,8 +237,7 @@ const Index = () => {
               Ready to talk about your lot?
             </h2>
             <p className="text-primary-foreground/75 leading-relaxed mb-8 max-w-md">
-              Send us a message on Facebook with your documents and questions — we usually reply
-              the same day.
+              Send us a message on Facebook / WhatsApp / viber with your documents and questions — we reply the same day.
             </p>
             <FacebookCTA variant="light" />
           </div>

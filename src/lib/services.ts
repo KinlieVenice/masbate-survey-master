@@ -76,6 +76,26 @@ export const SERVICES: Service[] = [
     uses: ["Occupancy permit", "Bank refinancing", "Construction verification"],
   },
   {
+    slug: "topographic-hydrographic-survey",
+    name: "Topographic & Hydrographic Survey",
+    short: "Measure land elevation and underwater features for planning, design, and development.",
+    description:
+      "Topographic and hydrographic surveys provide detailed data about the physical features of land and water. Topographic surveys capture terrain, elevations, and surface features, while hydrographic surveys measure water depth, seabed profiles, and underwater conditions — essential for engineering, construction, and environmental planning.",
+    details: [
+      "Ground elevation and contour mapping",
+      "Location of natural and man-made features",
+      "Bathymetric survey (water depth measurement)",
+      "Seabed and riverbed profiling",
+      "Data processing and survey plans",
+    ],
+    uses: [
+      "Site development planning",
+      "Road and infrastructure design",
+      "Flood and drainage studies",
+      "Coastal and marine projects",
+    ],
+  },
+  {
     slug: "sketch-plan-with-vicinity",
     name: "Sketch Plan with Vicinity",
     short: "Detailed sketch of your lot showing dimensions, area, and surrounding landmarks.",
@@ -102,6 +122,47 @@ export const SERVICES: Service[] = [
     ],
     uses: ["Document submissions", "Office records", "Permit applications"],
   },
+  {
+    slug: "lot-approval-process",
+    name: "Approval Process (Subdivision, Segregation, Consolidation)",
+    short: "Handle the legal approval of land division or combination for new title issuance.",
+    description:
+      "We assist in the complete approval process for subdivided, segregated, or consolidated lots. This includes preparing documents, submitting plans to government agencies, and coordinating until approval is granted — allowing new land titles to be officially issued.",
+    details: [
+      "Preparation of survey and technical documents",
+      "Submission to DENR/LRA for approval",
+      "Follow-up and status monitoring",
+      "Coordination with LGU and other agencies",
+      "Assistance until final approval release",
+    ],
+    uses: [
+      "Subdivision approval",
+      "Lot segregation processing",
+      "Lot consolidation approval",
+      "Title issuance for new lots",
+    ],
+  },
+  {
+    slug: "transfer-of-title-tax-declaration",
+    name: "Transfer of Title & Tax Declaration",
+    short: "Process the legal transfer of land ownership to a new owner.",
+    description:
+      "We facilitate the transfer of ownership of land by handling both the title transfer and tax declaration update. This ensures that the property is legally recorded under the new owner in both the Registry of Deeds and the local assessor’s office.",
+    details: [
+      "Preparation and verification of transfer documents",
+      "Processing with Registry of Deeds (title transfer)",
+      "Updating of tax declaration with local assessor",
+      "Coordination with BIR for tax requirements",
+      "End-to-end assistance until completion",
+    ],
+    uses: [
+      "Property sale or purchase",
+      "Inheritance transfers",
+      "Donation of property",
+      "Ownership record updates",
+    ],
+  }
+
 ];
 
 export const FACEBOOK_URL = "https://www.facebook.com/RanolaSurveyingPAX";

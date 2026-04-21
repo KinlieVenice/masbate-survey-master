@@ -67,11 +67,10 @@ const Terms = () => {
             <ul className="list-disc pl-5 space-y-2 mb-6">
               <li>Minor revisions due to our error are included at no additional cost.</li>
               <li>Major changes requested by the client after plan completion may incur additional charges based on the scope of changes.</li>
-              <li>Revision requests must be submitted within 30 days of plan delivery.</li>
             </ul>
 
             <div className="border-t border-border pt-8 mt-8 text-sm text-muted-foreground">
-              <p>Last updated: January 2025</p>
+              <p>Last updated: April 2026</p>
               <p className="mt-2">For questions about these terms, please contact us before proceeding with your survey booking.</p>
             </div>
           </div>
