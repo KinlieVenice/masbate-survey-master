@@ -19,6 +19,31 @@ const fileToDataUrl = (file: File): Promise<string> =>
     r.readAsDataURL(file);
   });
 
+const MAX_DIM = 1600;
+const compressImage = (file: File): Promise<string> =>
+  new Promise(async (resolve, reject) => {
+    try {
+      const dataUrl = await fileToDataUrl(file);
+      if (!file.type.startsWith("image/") || file.type === "image/gif") return resolve(dataUrl);
+      const img = new Image();
+      img.onload = () => {
+        let { width, height } = img;
+        if (width > MAX_DIM || height > MAX_DIM) {
+          const s = Math.min(MAX_DIM / width, MAX_DIM / height);
+          width = Math.round(width * s); height = Math.round(height * s);
+        }
+        const c = document.createElement("canvas");
+        c.width = width; c.height = height;
+        const ctx = c.getContext("2d");
+        if (!ctx) return resolve(dataUrl);
+        ctx.drawImage(img, 0, 0, width, height);
+        try { resolve(c.toDataURL("image/jpeg", 0.78)); } catch { resolve(dataUrl); }
+      };
+      img.onerror = () => resolve(dataUrl);
+      img.src = dataUrl;
+    } catch (e) { reject(e); }
+  });
+
 const AdminSaleDetail = () => {
   const { id } = useParams();
   const nav = useNavigate();
@@ -45,8 +70,18 @@ const AdminSaleDetail = () => {
     if (!list || list.length === 0) return;
     setBusy(true);
     try {
+      const MAX_FILES = 15;
+      const remaining = MAX_FILES - sale.files.length;
+      if (remaining <= 0) {
+        toast.error(`Maximum ${MAX_FILES} files per sale`);
+        return;
+      }
+      const incoming = Array.from(list).slice(0, remaining);
+      if (list.length > remaining) {
+        toast.error(`Only ${remaining} more file${remaining > 1 ? "s" : ""} allowed (max ${MAX_FILES})`);
+      }
       const next: SaleFile[] = [];
-      for (const f of Array.from(list)) {
+      for (const f of incoming) {
         if (f.size > 8 * 1024 * 1024) {
           toast.error(`${f.name} skipped — over 8MB`);
           continue;
@@ -54,8 +89,8 @@ const AdminSaleDetail = () => {
         next.push({
           id: Math.random().toString(36).slice(2, 10),
           name: f.name,
-          type: f.type || "application/octet-stream",
-          dataUrl: await fileToDataUrl(f),
+          type: f.type.startsWith("image/") && f.type !== "image/gif" ? "image/jpeg" : (f.type || "application/octet-stream"),
+          dataUrl: await compressImage(f),
         });
       }
       upsertSale({
@@ -70,6 +105,8 @@ const AdminSaleDetail = () => {
       });
       toast.success(`${next.length} file${next.length === 1 ? "" : "s"} uploaded`);
       setVersion((v) => v + 1);
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Upload failed");
     } finally {
       setBusy(false);
     }
