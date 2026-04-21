@@ -103,7 +103,7 @@ const About = () => {
           </div>
           <div className="md:col-span-7">
             <figure className="flex items-start gap-6">
-              <div className="relative h-28 w-28 sm:h-32 sm:w-32 shrink-0 rounded-sm overflow-hidden bg-secondary">
+              <div className="relative h-36 w-36 sm:h-44 sm:w-44 shrink-0 rounded-sm overflow-hidden bg-secondary">
                 <img
                   src={teamRam}
                   alt="Ram Cedrick A. Rañola"
@@ -119,7 +119,7 @@ const About = () => {
                   Facebook Admin Manager · Secretary
                 </p>
                 <p className="text-sm text-muted-foreground leading-relaxed max-w-sm">
-                  Handles client communications and coordinates appointments to ensure smooth service delivery.
+                  Supports the practice by managing inquiries and keeping operations organized behind the scenes.
                 </p>
               </figcaption>
             </figure>
