@@ -82,8 +82,8 @@ const About = () => {
             Working alongside Engr. Rañola.
           </h2>
         </div>
-        <div className="grid sm:grid-cols-2 gap-10 md:gap-12 max-w-2xl">
-          <figure className="space-y-4">
+        <div className="grid sm:grid-cols-2 gap-8 max-w-md">
+          <figure className="space-y-4 max-w-[180px]">
             <div className="relative aspect-square rounded-sm overflow-hidden bg-secondary">
               <img
                 src={teamRam}
@@ -93,8 +93,8 @@ const About = () => {
               />
             </div>
             <figcaption>
-              <h3 className="font-serif text-lg text-foreground">Ram Cedrick A. Rañola</h3>
-              <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground mt-1.5">
+              <h3 className="font-serif text-base text-foreground">Ram Cedrick A. Rañola</h3>
+              <p className="text-[11px] uppercase tracking-[0.2em] text-muted-foreground mt-1.5">
                 Facebook Admin Manager · Secretary
               </p>
             </figcaption>
