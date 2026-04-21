@@ -94,7 +94,7 @@ const About = () => {
 
       {/* Team */}
       <section className="container py-16 md:py-24">
-        <div className="grid md:grid-cols-12 gap-10 items-start">
+        <div className="grid md:grid-cols-12 gap-10 items-start mb-14 md:mb-20">
           <div className="md:col-span-5">
             <div className="text-xs uppercase tracking-[0.25em] text-muted-foreground mb-4">The team</div>
             <h2 className="font-serif text-2xl md:text-3xl text-foreground leading-tight text-balance max-w-sm">
@@ -123,6 +123,37 @@ const About = () => {
                 </p>
               </figcaption>
             </figure>
+          </div>
+        </div>
+
+        {/* Survey Aids */}
+        <div className="border-t border-border pt-14 md:pt-20">
+          <div className="text-xs uppercase tracking-[0.25em] text-muted-foreground mb-8">Survey Aids</div>
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-8 md:gap-10">
+            {[
+              { name: "Juan D. Bautista", role: "Survey Aid" },
+              { name: "Mario L. Santos", role: "Survey Aid" },
+              { name: "Pedro M. Cruz", role: "Survey Aid" },
+            ].map((member) => (
+              <figure key={member.name} className="flex flex-col">
+                <div className="relative aspect-[4/5] w-full max-w-[200px] rounded-sm overflow-hidden bg-secondary mb-4">
+                  <img
+                    src="/placeholder.svg"
+                    alt={member.name}
+                    loading="lazy"
+                    className="absolute inset-0 h-full w-full object-cover"
+                  />
+                </div>
+                <figcaption>
+                  <h4 className="font-serif text-lg text-foreground leading-tight">
+                    {member.name}
+                  </h4>
+                  <p className="text-[11px] uppercase tracking-[0.2em] text-muted-foreground mt-2">
+                    {member.role}
+                  </p>
+                </figcaption>
+              </figure>
+            ))}
           </div>
         </div>
       </section>
