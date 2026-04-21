@@ -5,7 +5,7 @@ import logo from "@/assets/ranola-logo.jpg";
 
 export const SiteFooter = () => {
   return (
-    <footer className="bg-gradient-forest text-primary-foreground mt-24">
+    <footer className="bg-gradient-forest text-primary-foreground">
       <div className="container py-16 grid gap-12 md:grid-cols-12">
         <div className="md:col-span-4 space-y-4">
           <div className="flex items-center gap-3">
