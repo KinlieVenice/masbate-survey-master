@@ -68,7 +68,7 @@ const save = (key: string, value: unknown) => {
     localStorage.setItem(key, JSON.stringify(value));
   } catch (err) {
     if (err instanceof DOMException && (err.name === "QuotaExceededError" || err.code === 22)) {
-      throw new Error("Storage full — too many large files. Remove some files or use smaller ones.");
+      throw new Error("Storage full — since this is a mock up, only 1-2 small images can be saved to limit storage use.");
     }
     throw err;
   }

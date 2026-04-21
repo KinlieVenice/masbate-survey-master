@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { format } from "date-fns";
-import { Plus, Search, Pencil, Trash2, MapPin } from "lucide-react";
+import { Plus, Search, Pencil, Eye, Trash2, MapPin } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -67,7 +67,7 @@ const AdminSales = () => {
               {sales.map((s) => (
                 <tr key={s.id} className="border-b border-border/60 hover:bg-secondary/40 transition-colors">
                   <td className="py-3 px-2">
-                    <Link to={`/ranola-admin/sales/${s.id}`} className="font-medium text-foreground hover:text-primary">
+                    <Link to={`/ranola-admin/sales/${s.id}`} className="font-medium text-foreground hover:text-primary hover:underline">
                       {s.clientName}
                     </Link>
                     <div className="text-xs text-muted-foreground">{s.checklist.filter(Boolean).length}/{s.checklist.length} requirements · {s.files.length} files</div>
@@ -92,6 +92,11 @@ const AdminSales = () => {
                     <div className="inline-flex gap-1">
                       <Button variant="ghost" size="icon" onClick={() => { setEditing(s); setOpen(true); }}>
                         <Pencil className="h-4 w-4" />
+                      </Button>
+                      <Button variant="ghost" size="icon" asChild>
+                        <Link to={`/ranola-admin/sales/${s.id}`}>
+                          <Eye className="h-4 w-4" />
+                        </Link>
                       </Button>
                       <DeleteBtn onConfirm={() => { deleteSale(s.id); toast.success("Sale deleted"); refresh(); }} />
                     </div>
