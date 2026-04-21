@@ -3,6 +3,7 @@ import { ArrowRight } from "lucide-react";
 import { SERVICES } from "@/lib/services";
 import { FacebookCTA } from "@/components/site/FacebookCTA";
 import { cn } from "@/lib/utils";
+import topo from "@/assets/topo-map.jpg";
 
 const Services = () => {
   return (
