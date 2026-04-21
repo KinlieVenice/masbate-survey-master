@@ -102,8 +102,8 @@ const About = () => {
             </h2>
           </div>
           <div className="md:col-span-7">
-            <figure className="flex items-center gap-5 max-w-sm">
-              <div className="relative h-20 w-20 sm:h-24 sm:w-24 shrink-0 rounded-sm overflow-hidden bg-secondary">
+            <figure className="flex items-start gap-6">
+              <div className="relative h-28 w-28 sm:h-32 sm:w-32 shrink-0 rounded-sm overflow-hidden bg-secondary">
                 <img
                   src={teamRam}
                   alt="Ram Cedrick A. Rañola"
@@ -111,12 +111,15 @@ const About = () => {
                   className="absolute inset-0 h-full w-full object-cover"
                 />
               </div>
-              <figcaption>
-                <h3 className="font-serif text-lg text-foreground leading-tight">
+              <figcaption className="pt-1">
+                <h3 className="font-serif text-xl text-foreground leading-tight">
                   Ram Cedrick A. Rañola
                 </h3>
-                <p className="text-[11px] uppercase tracking-[0.2em] text-muted-foreground mt-2">
+                <p className="text-[11px] uppercase tracking-[0.2em] text-muted-foreground mt-2 mb-3">
                   Facebook Admin Manager · Secretary
+                </p>
+                <p className="text-sm text-muted-foreground leading-relaxed max-w-sm">
+                  Handles client communications and coordinates appointments to ensure smooth service delivery.
                 </p>
               </figcaption>
             </figure>
