@@ -74,7 +74,7 @@ export const SaleFormDialog = ({
   const paidNum = Number(paid) || 0;
   const status = computeStatus(totalNum, paidNum);
 
-  const MAX_FILES = 10;
+  const MAX_FILES = 15;
   const handleFiles = async (list: FileList | null) => {
     if (!list) return;
     setBusy(true);
@@ -166,11 +166,11 @@ export const SaleFormDialog = ({
             <div className="grid sm:grid-cols-3 gap-4">
               <div className="space-y-1.5">
                 <Label htmlFor="total">Total amount (₱)</Label>
-                <Input id="total" type="number" min={0} step="0.01" value={total} onChange={(e) => setTotal(e.target.value)} />
+                <Input id="total" type="number" min={0} step="0.01" value={total} onChange={(e) => setTotal(e.target.value)} onFocus={(e) => { if (e.target.value === "0") setTotal(""); e.target.select(); }} onBlur={(e) => { if (e.target.value === "") setTotal("0"); }} />
               </div>
               <div className="space-y-1.5">
                 <Label htmlFor="paid">Paid amount (₱)</Label>
-                <Input id="paid" type="number" min={0} step="0.01" value={paid} onChange={(e) => setPaid(e.target.value)} />
+                <Input id="paid" type="number" min={0} step="0.01" value={paid} onChange={(e) => setPaid(e.target.value)} onFocus={(e) => { if (e.target.value === "0") setPaid(""); e.target.select(); }} onBlur={(e) => { if (e.target.value === "") setPaid("0"); }} />
               </div>
               <div className="space-y-1.5">
                 <Label>Status (auto)</Label>
@@ -208,9 +208,9 @@ export const SaleFormDialog = ({
               <Label className="block mb-3">Bulk file upload</Label>
               <label className="flex flex-col items-center justify-center gap-2 border-2 border-dashed border-border rounded-sm p-6 cursor-pointer hover:bg-muted/30 transition-colors">
                 <Upload className="h-5 w-5 text-muted-foreground" />
-                <span className="text-sm text-muted-foreground text-center">Click to upload — up to 10 files (max 8MB each)</span>
-                <span className="text-xs text-muted-foreground/70">Images, PDFs, documents · {files.length}/10 used</span>
-                <input type="file" multiple accept="image/*,application/pdf,.doc,.docx,.xls,.xlsx" className="hidden" disabled={files.length >= 10} onChange={(e) => { handleFiles(e.target.files); e.target.value = ""; }} />
+                <span className="text-sm text-muted-foreground text-center">Click to upload — up to 15 files (max 8MB each)</span>
+                <span className="text-xs text-muted-foreground/70">Images, PDFs, documents · {files.length}/15 used</span>
+                <input type="file" multiple accept="image/*,application/pdf,.doc,.docx,.xls,.xlsx" className="hidden" disabled={files.length >= 15} onChange={(e) => { handleFiles(e.target.files); e.target.value = ""; }} />
               </label>
               {files.length > 0 && (
                 <div className="mt-3 space-y-2">

@@ -48,7 +48,7 @@ export type Expense = {
 
 export const EXPENSE_CATEGORIES = ["Labor", "Overhead", "Equipment", "Transport", "Office", "Government Fees", "Other"];
 
-const SALES_KEY = "ranola_sales_v1";
+const SALES_KEY = "ranola_sales_v2";
 const EXPENSES_KEY = "ranola_expenses_v1";
 const AUTH_KEY = "ranola_admin_auth";
 const USERS_KEY = "ranola_admin_users";
@@ -74,9 +74,24 @@ export const computeStatus = (total: number, paid: number): SaleStatus => {
 const uid = () => Math.random().toString(36).slice(2, 11);
 
 // Seed demo data once
-const seed = () => {
+const seed = async () => {
   if (load<Sale[]>(SALES_KEY, []).length === 0) {
     const today = new Date();
+    // Lazy-load mock images so seeding doesn't block initial render
+    const [taxDecl, aerial, sketch, propPhoto] = await Promise.all([
+      import("@/assets/mock-tax-declaration.jpg").then((m) => m.default),
+      import("@/assets/mock-land-aerial.jpg").then((m) => m.default),
+      import("@/assets/mock-lot-sketch.jpg").then((m) => m.default),
+      import("@/assets/mock-property-photo.jpg").then((m) => m.default),
+    ]);
+    const mockFilesA: SaleFile[] = [
+      { id: uid(), name: "tax-declaration.jpg", type: "image/jpeg", dataUrl: taxDecl },
+      { id: uid(), name: "lot-aerial-view.jpg", type: "image/jpeg", dataUrl: aerial },
+    ];
+    const mockFilesB: SaleFile[] = [
+      { id: uid(), name: "lot-sketch.jpg", type: "image/jpeg", dataUrl: sketch },
+      { id: uid(), name: "property-photo.jpg", type: "image/jpeg", dataUrl: propPhoto },
+    ];
     const demo: Sale[] = Array.from({ length: 6 }).map((_, i) => {
       const d = new Date(today);
       d.setDate(d.getDate() - i * 7 + 3);
@@ -91,7 +106,7 @@ const seed = () => {
         paidAmount: paid,
         status: computeStatus(total, paid),
         checklist: REQUIREMENTS_CHECKLIST.map((_, k) => k < 3 + (i % 4)),
-        files: [],
+        files: i === 0 ? mockFilesA : i === 2 ? mockFilesB : [],
         createdAt: new Date(today.getTime() - i * 86400000 * 4).toISOString(),
       };
     });
