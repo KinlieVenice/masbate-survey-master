@@ -1,4 +1,4 @@
-import surveyor from "@/assets/surveyor-equipment.jpg";
+import surveyor from "@/assets/ranola-building.jpeg";
 import { FacebookCTA } from "@/components/site/FacebookCTA";
 
 const About = () => {
