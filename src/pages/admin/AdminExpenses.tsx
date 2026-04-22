@@ -196,10 +196,6 @@ const ExpenseFormDialog = ({ open, onOpenChange, expense, onSaved }: { open: boo
               <Input id="eamount" type="number" min={0} step="0.01" value={amount} onChange={(e) => setAmount(e.target.value)} />
             </div>
           </div>
-          <div className="space-y-1.5">
-            <Label htmlFor="edate">Date</Label>
-            <Input id="edate" type="date" value={date.slice(0, 10)} onChange={(e) => setDate(new Date(e.target.value).toISOString())} />
-          </div>
         </div>
         <DialogFooter>
           <Button variant="outline" onClick={() => onOpenChange(false)}>Cancel</Button>
