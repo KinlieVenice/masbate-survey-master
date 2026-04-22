@@ -12,7 +12,7 @@ import {
   subMonths,
   isToday,
 } from "date-fns";
-import { ChevronLeft, ChevronRight, MapPin, User2, CalendarDays } from "lucide-react";
+import { ChevronLeft, ChevronRight, MapPin, User2, CalendarDays, Clock } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -54,7 +54,9 @@ const AdminBookings = () => {
   }, [sales]);
 
   const selectedKey = format(selected, "yyyy-MM-dd");
-  const selectedBookings = byDay.get(selectedKey) ?? [];
+  const selectedBookings = (byDay.get(selectedKey) ?? [])
+    .slice()
+    .sort((a, b) => +new Date(a.surveyingDay) - +new Date(b.surveyingDay));
 
   const monthBookingsCount = useMemo(
     () =>
@@ -139,9 +141,9 @@ const AdminBookings = () => {
                       <div
                         key={s.id}
                         className="text-[10px] sm:text-[11px] leading-tight truncate px-1 py-0.5 rounded-sm bg-primary/10 text-primary"
-                        title={`${s.clientName}${s.location ? " — " + s.location : ""}`}
+                        title={`${format(new Date(s.surveyingDay), "h:mm a")} — ${s.clientName}${s.location ? " — " + s.location : ""}`}
                       >
-                        {s.clientName}
+                        <span className="font-medium">{format(new Date(s.surveyingDay), "h:mma").toLowerCase()}</span> {s.clientName}
                       </div>
                     ))}
                     {items.length > 2 && (
@@ -186,10 +188,19 @@ const AdminBookings = () => {
                         <User2 className="h-3.5 w-3.5 text-primary shrink-0" />
                         <span className="truncate">{s.clientName}</span>
                       </div>
+                      <div className="flex items-center gap-2 text-xs text-primary mt-1.5 font-medium">
+                        <Clock className="h-3.5 w-3.5 shrink-0" />
+                        <span>{format(new Date(s.surveyingDay), "h:mm a")}</span>
+                      </div>
                       <div className="flex items-start gap-2 text-xs text-muted-foreground mt-1.5">
                         <MapPin className="h-3.5 w-3.5 mt-0.5 shrink-0" />
                         <span className="leading-snug">{s.location || "Location not set"}</span>
                       </div>
+                      {s.remarks && (
+                        <div className="text-xs text-muted-foreground/90 mt-2 italic line-clamp-2">
+                          “{s.remarks}”
+                        </div>
+                      )}
                     </div>
                     <Badge variant="outline" className={cn("shrink-0 text-[10px]", statusClass(s.status))}>
                       {s.status}

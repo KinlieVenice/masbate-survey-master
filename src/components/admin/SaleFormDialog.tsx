@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Textarea } from "@/components/ui/textarea";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
 import { Badge } from "@/components/ui/badge";
@@ -81,30 +82,37 @@ export const SaleFormDialog = ({
   const [clientName, setClientName] = useState("");
   const [location, setLocation] = useState("");
   const [date, setDate] = useState<Date>(new Date());
+  const [time, setTime] = useState("09:00");
   const [total, setTotal] = useState("0");
   const [paid, setPaid] = useState("0");
   const [checklist, setChecklist] = useState<boolean[]>(REQUIREMENTS_CHECKLIST.map(() => false));
   const [files, setFiles] = useState<SaleFile[]>([]);
+  const [remarks, setRemarks] = useState("");
   const [busy, setBusy] = useState(false);
 
   useEffect(() => {
     if (open) {
       if (sale) {
+        const d = new Date(sale.surveyingDay);
         setClientName(sale.clientName);
         setLocation(sale.location ?? "");
-        setDate(new Date(sale.surveyingDay));
+        setDate(d);
+        setTime(`${String(d.getHours()).padStart(2, "0")}:${String(d.getMinutes()).padStart(2, "0")}`);
         setTotal(String(sale.totalAmount));
         setPaid(String(sale.paidAmount));
         setChecklist(sale.checklist.length === REQUIREMENTS_CHECKLIST.length ? sale.checklist : REQUIREMENTS_CHECKLIST.map(() => false));
         setFiles(sale.files);
+        setRemarks(sale.remarks ?? "");
       } else {
         setClientName("");
         setLocation("");
         setDate(new Date());
+        setTime("09:00");
         setTotal("0");
         setPaid("0");
         setChecklist(REQUIREMENTS_CHECKLIST.map(() => false));
         setFiles([]);
+        setRemarks("");
       }
     }
   }, [open, sale]);
@@ -149,15 +157,19 @@ export const SaleFormDialog = ({
   const submit = () => {
     try {
       const v = schema.parse({ clientName, totalAmount: totalNum, paidAmount: paidNum });
+      const [hh, mm] = time.split(":").map((n) => Number(n) || 0);
+      const merged = new Date(date);
+      merged.setHours(hh, mm, 0, 0);
       upsertSale({
         id: sale?.id,
         clientName: v.clientName,
         location: location.trim() || undefined,
-        surveyingDay: date.toISOString(),
+        surveyingDay: merged.toISOString(),
         totalAmount: v.totalAmount,
         paidAmount: v.paidAmount,
         checklist,
         files,
+        remarks: remarks.trim() || undefined,
       });
       toast.success(sale ? "Sale updated" : "Sale added");
       onSaved();
@@ -197,9 +209,15 @@ export const SaleFormDialog = ({
               </div>
             </div>
 
-            <div className="space-y-1.5">
-              <Label htmlFor="location">Location (Barangay / Municipality)</Label>
-              <Input id="location" value={location} onChange={(e) => setLocation(e.target.value)} maxLength={160} placeholder="e.g. Brgy. Nursery, Masbate City" />
+            <div className="grid sm:grid-cols-2 gap-4">
+              <div className="space-y-1.5">
+                <Label htmlFor="time">Surveying time</Label>
+                <Input id="time" type="time" value={time} onChange={(e) => setTime(e.target.value)} />
+              </div>
+              <div className="space-y-1.5">
+                <Label htmlFor="location">Location (Barangay / Municipality)</Label>
+                <Input id="location" value={location} onChange={(e) => setLocation(e.target.value)} maxLength={160} placeholder="e.g. Brgy. Nursery, Masbate City" />
+              </div>
             </div>
 
             <div className="grid sm:grid-cols-3 gap-4">
@@ -264,6 +282,11 @@ export const SaleFormDialog = ({
                   ))}
                 </div>
               )}
+            </div>
+
+            <div className="space-y-1.5">
+              <Label htmlFor="remarks">Remarks <span className="text-muted-foreground font-normal">(optional)</span></Label>
+              <Textarea id="remarks" value={remarks} onChange={(e) => setRemarks(e.target.value)} maxLength={1000} rows={3} placeholder="Notes about this sale, the surveying day, or any special instructions…" />
             </div>
           </div>
         </div>

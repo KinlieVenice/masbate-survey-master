@@ -102,6 +102,7 @@ const AdminSaleDetail = () => {
         paidAmount: sale.paidAmount,
         checklist: sale.checklist,
         files: [...sale.files, ...next],
+        remarks: sale.remarks,
       });
       toast.success(`${next.length} file${next.length === 1 ? "" : "s"} uploaded`);
       setVersion((v) => v + 1);
@@ -122,6 +123,7 @@ const AdminSaleDetail = () => {
       paidAmount: sale.paidAmount,
       checklist: sale.checklist,
       files: sale.files.filter((f) => f.id !== fileId),
+      remarks: sale.remarks,
     });
     setIdx(0);
     setVersion((v) => v + 1);
@@ -138,7 +140,7 @@ const AdminSaleDetail = () => {
         <div>
           <div className="text-xs uppercase tracking-wider text-muted-foreground mb-1">Client</div>
           <h1 className="font-serif text-3xl text-foreground">{sale.clientName}</h1>
-          <p className="text-sm text-muted-foreground mt-1">Surveying day · {format(new Date(sale.surveyingDay), "EEEE, MMM d, yyyy")}</p>
+          <p className="text-sm text-muted-foreground mt-1">Surveying day · {format(new Date(sale.surveyingDay), "EEEE, MMM d, yyyy 'at' h:mm a")}</p>
           <p className="text-sm text-muted-foreground mt-1 inline-flex items-start gap-1.5">
             <MapPin className="h-4 w-4 mt-0.5 text-primary shrink-0" />
             <span>{sale.location || <span className="italic opacity-70">Location not set</span>}</span>
@@ -273,6 +275,13 @@ const AdminSaleDetail = () => {
               {sale.checklist.filter(Boolean).length} of {sale.checklist.length} complete
             </div>
           </Card>
+
+          {sale.remarks && (
+            <Card className="p-6">
+              <h3 className="font-serif text-lg mb-3">Remarks</h3>
+              <p className="text-sm text-foreground/85 whitespace-pre-wrap leading-relaxed">{sale.remarks}</p>
+            </Card>
+          )}
         </div>
       </div>
 
