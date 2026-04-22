@@ -124,7 +124,7 @@ const About = () => {
           </h2>
         </div>
 
-        <div className="relative grid md:grid-cols-2 gap-x-10 lg:gap-x-20 gap-y-16 md:gap-y-0">
+        <div className="relative grid lg:grid-cols-2 gap-x-10 lg:gap-x-20 gap-y-16 md:gap-y-0">
           {[
             {
               name: "Ram Cedrick A. Rañola",
@@ -148,7 +148,7 @@ const About = () => {
               {/* Top accent bar */}
               <div className="absolute top-0 left-0 h-px w-16 bg-primary/50" />
               <div className="flex flex-col sm:flex-row gap-6">
-                <div className="relative h-[180px] w-[180px] sm:h-[200px] sm:w-[200px] shrink-0 rounded-sm overflow-hidden bg-secondary shadow-elevated">
+                <div className="relative aspect-[4/5] w-[60%] sm:w-[250px] shrink-0 rounded-sm overflow-hidden bg-secondary shadow-elevated">
                   <img
                     src={m.pic}
                     alt={m.name}
