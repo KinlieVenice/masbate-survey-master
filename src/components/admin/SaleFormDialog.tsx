@@ -283,6 +283,11 @@ export const SaleFormDialog = ({
                 </div>
               )}
             </div>
+
+            <div className="space-y-1.5">
+              <Label htmlFor="remarks">Remarks <span className="text-muted-foreground font-normal">(optional)</span></Label>
+              <Textarea id="remarks" value={remarks} onChange={(e) => setRemarks(e.target.value)} maxLength={1000} rows={3} placeholder="Notes about this sale, the surveying day, or any special instructions…" />
+            </div>
           </div>
         </div>
         <DialogFooter className="px-6 py-4 border-t border-border">
