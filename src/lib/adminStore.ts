@@ -34,6 +34,7 @@ export type Sale = {
   status: SaleStatus;
   checklist: boolean[]; // length === REQUIREMENTS_CHECKLIST.length
   files: SaleFile[];
+  remarks?: string;
   createdAt: string;
 };
 
