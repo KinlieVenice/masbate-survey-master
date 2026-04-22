@@ -2,6 +2,11 @@ import surveyor from "@/assets/ranola-building.jpeg";
 import teamRam from "@/assets/team-ram.png";
 import teamRacel from "@/assets/engr-racel.jpg";
 import teamJonalyn from "@/assets/jonalyn.jpg";
+import danilo from "@/assets/danilo.jpeg";
+import nelmar from "@/assets/nelmar.jpg";
+import christian from "@/assets/christian.jpeg";
+import jhong from "@/assets/jhong.jpeg";
+import julio from "@/assets/julio.jpeg";
 import { FacebookCTA } from "@/components/site/FacebookCTA";
 
 const About = () => {
