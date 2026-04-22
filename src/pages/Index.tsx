@@ -341,73 +341,31 @@ const Index = () => {
 
       {/* CTA */}
       <section className="relative overflow-hidden">
-        {/* Background image */}
+        {/* Background */}
         <img
           src={surveyor}
           alt=""
-          className="absolute inset-0 h-full w-full object-cover opacity-20"
+          className="absolute inset-0 h-full w-full object-cover opacity-15"
           loading="lazy"
         />
 
-        {/* Softer overlay */}
         <div className="absolute inset-0 bg-gradient-to-b from-primary/80 via-primary/85 to-primary/90" />
 
         {/* Content */}
-        <div className="container relative py-20 md:py-28">
-          <div className="bg-white/95 backdrop-blur-sm rounded-xl p-10 md:p-14 grid md:grid-cols-2 gap-12 items-center shadow-xl">
-            {/* LEFT SIDE */}
-            <div>
-              <h2 className="font-serif text-foreground text-3xl md:text-5xl leading-tight mb-6">
-                Ready to talk about your lot?
-              </h2>
+        <div className="container relative py-16 md:py-20 flex justify-center">
+          
+          <div className="bg-white/95 backdrop-blur-sm rounded-xl px-8 py-10 md:px-14 md:py-10 text-center shadow-lg max-w-2xl w-full">
 
-              <p className="text-muted-foreground leading-relaxed mb-8 max-w-md">
-                Send us a message on Facebook / WhatsApp / Viber with your
-                documents and questions — we reply the same day.
-              </p>
+            <h2 className="font-serif text-foreground text-2xl md:text-3xl leading-tight mb-4">
+              Not sure which service you need?
+            </h2>
 
-              <FacebookCTA variant="primary" />
-            </div>
+            <p className="text-muted-foreground text-sm md:text-base mb-6 max-w-md mx-auto">
+              Send your documents and questions — we’ll guide you on the next step.
+            </p>
 
-            {/* RIGHT SIDE */}
-            <div className="space-y-5 text-foreground">
-              <div className="flex items-start gap-4 border-t pt-5 border-muted">
-                <MapPin className="h-5 w-5 mt-0.5 text-muted-foreground" />
-                <div>
-                  <div className="text-xs uppercase tracking-wider text-muted-foreground mb-1">
-                    Office
-                  </div>
-                  <a
-                    href="https://www.google.com/maps?q=Rañola+Surveying+Office"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-sm hover:underline underline-offset-4 transition-colors"
-                  >
-                    {ADDRESS}
-                  </a>
-                </div>
-              </div>
+            <FacebookCTA variant="primary" />
 
-              <div className="flex items-start gap-4 border-t pt-5 border-muted">
-                <Phone className="h-5 w-5 mt-0.5 text-muted-foreground" />
-                <a
-                  href={`tel:${PHONE}`}
-                  className="text-sm hover:underline underline-offset-4"
-                >
-                  {PHONE}
-                </a>
-              </div>
-
-              <div className="flex items-start gap-4 border-t pt-5 border-muted">
-                <Mail className="h-5 w-5 mt-0.5 text-muted-foreground" />
-                <a
-                  href={`mailto:${EMAIL}`}
-                  className="text-sm hover:underline underline-offset-4"
-                >
-                  {EMAIL}
-                </a>
-              </div>
-            </div>
           </div>
         </div>
       </section>

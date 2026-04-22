@@ -52,7 +52,7 @@ const About = () => {
             </p>
           </div>
           <div className="md:col-span-5 order-1 md:order-2">
-            <div className="relative aspect-[4/5] rounded-sm overflow-hidden shadow-elevated max-w-[200px] sm:max-w-[240px] md:max-w-none mx-auto md:ml-auto md:mr-0">
+            <div className="relative aspect-[4/5] rounded-sm overflow-hidden shadow-elevated max-w-[400px] sm:max-w-[440px] md:max-w-none mx-auto md:ml-auto md:mr-0">
               <img src={surveyor} alt="Rañola Surveying Services office" loading="lazy" className="absolute inset-0 h-full w-full object-cover" />
             </div>
           </div>
@@ -80,8 +80,8 @@ const About = () => {
           <div className="grid md:grid-cols-12 gap-10 md:gap-16 items-center">
             <div className="md:col-span-5 lg:col-span-4 relative">
               {/* Offset frame accent */}
-              <div className="absolute -inset-3 md:-inset-4 border border-primary/30 rounded-sm translate-x-3 translate-y-3 md:translate-x-4 md:translate-y-4" />
-              <div className="relative aspect-[4/5] rounded-sm overflow-hidden shadow-deep max-w-[220px] sm:max-w-[260px] md:max-w-none mx-auto">
+              {/* <div className="absolute -inset-3 md:-inset-4 border border-primary/30 rounded-sm translate-x-3 translate-y-3 md:translate-x-4 md:translate-y-4" /> */}
+              <div className="relative aspect-[4/5] rounded-sm overflow-hidden shadow-deep max-w-[300px] sm:max-w-[360px] md:max-w-none mx-auto">
                 <img
                   src={teamRacel}
                   alt="Racel Claire A. Rañola"
@@ -250,36 +250,22 @@ const About = () => {
         <div className="absolute inset-0 bg-gradient-to-b from-primary/80 via-primary/85 to-primary/90" />
 
         {/* Content */}
-        <section className="relative overflow-hidden">
-          {/* Background */}
-          <img
-            src={surveyor}
-            alt=""
-            className="absolute inset-0 h-full w-full object-cover opacity-15"
-            loading="lazy"
-          />
+        <div className="container relative py-16 md:py-20 flex justify-center">
 
-          <div className="absolute inset-0 bg-gradient-to-b from-primary/80 via-primary/85 to-primary/90" />
+          <div className="bg-white/95 backdrop-blur-sm rounded-xl px-8 py-10 md:px-14 md:py-10 text-center shadow-lg max-w-2xl w-full">
 
-          {/* Content */}
-          <div className="container relative py-16 md:py-20 flex justify-center">
-            
-            <div className="bg-white/95 backdrop-blur-sm rounded-xl px-8 py-10 md:px-14 md:py-10 text-center shadow-lg max-w-2xl w-full">
+            <h2 className="font-serif text-foreground text-2xl md:text-3xl leading-tight mb-4">
+              Not sure which service you need?
+            </h2>
 
-              <h2 className="font-serif text-foreground text-2xl md:text-3xl leading-tight mb-4">
-                Talk to us about your land.
-              </h2>
+            <p className="text-muted-foreground text-sm md:text-base mb-6 max-w-md mx-auto">
+              Send your documents and questions — we’ll guide you on the next step.
+            </p>
 
-              <p className="text-muted-foreground text-sm md:text-base mb-6 max-w-md mx-auto">
-                Send your documents and questions — we’ll guide you on the next step.
-              </p>
+            <FacebookCTA variant="primary" />
 
-              <FacebookCTA variant="primary" />
-
-            </div>
           </div>
-        </section>
-
+        </div>
       </section>
 
 

@@ -20,7 +20,7 @@ const Contact = () => {
         </div>
       </section>
 
-      <section className="container mb-16 md:mb-24 pb-20 grid md:grid-cols-2 gap-px bg-border rounded-sm overflow-hidden shadow-soft">
+      <section className="container mb-16 md:mb-24 py-20 grid md:grid-cols-2 gap-px bg-border rounded-sm overflow-hidden shadow-soft">
         <div className="bg-card p-8 md:p-10 space-y-6">
           <div className="flex items-start gap-4">
             <MapPin className="h-5 w-5 mt-1 text-primary" />
