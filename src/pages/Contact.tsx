@@ -20,13 +20,20 @@ const Contact = () => {
         </div>
       </section>
 
-      <section className="container pb-20 grid md:grid-cols-2 gap-px bg-border rounded-sm overflow-hidden shadow-soft">
+      <section className="container mb-16 md:mb-24 pb-20 grid md:grid-cols-2 gap-px bg-border rounded-sm overflow-hidden shadow-soft">
         <div className="bg-card p-8 md:p-10 space-y-6">
           <div className="flex items-start gap-4">
             <MapPin className="h-5 w-5 mt-1 text-primary" />
             <div>
               <div className="text-xs uppercase tracking-wider text-muted-foreground mb-1">Office</div>
-              <div className="text-foreground">{ADDRESS}</div>
+              <a
+                href="https://www.google.com/maps?q=Rañola+Surveying+Office"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-foreground hover:text-primary underline-offset-4 transition-colors"
+              >
+                {ADDRESS}
+              </a>
             </div>
           </div>
           <div className="flex items-start gap-4">
@@ -55,7 +62,7 @@ const Contact = () => {
           <iframe
             title="Office location"
             className="absolute inset-0 h-full w-full"
-            src="https://www.google.com/maps?q=Mobo,+Masbate&output=embed"
+            src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3897.698644738569!2d123.65621037544109!3d12.336058987923915!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x33a6dd13327c3b5d%3A0x330ba42e6d450687!2sRa%C3%B1ola%20Surveying%20Office!5e0!3m2!1sen!2sph!4v1776817015433!5m2!1sen!2sph"
             loading="lazy"
             referrerPolicy="no-referrer-when-downgrade"
           />

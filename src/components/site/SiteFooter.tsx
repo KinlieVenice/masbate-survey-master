@@ -49,9 +49,16 @@ export const SiteFooter = () => {
             <a href={`mailto:${EMAIL}`} className="flex items-start gap-3 text-primary-foreground/85 hover:text-primary-foreground">
               <Mail className="h-4 w-4 mt-0.5 shrink-0" /> {EMAIL}
             </a>
-            <div className="flex items-start gap-3 text-primary-foreground/85">
-              <MapPin className="h-4 w-4 mt-0.5 shrink-0" /> {ADDRESS}
-            </div>
+            <a
+              href="https://www.google.com/maps/place/Ra%C3%B1ola+Surveying+Office/@12.336059,123.658385,17z"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-start gap-3 text-primary-foreground/85 hover:text-primary-foreground transition-colors"
+            >
+              <MapPin className="h-4 w-4 mt-0.5 shrink-0" />
+              {ADDRESS}
+            </a>
+
             <a
               href={FACEBOOK_URL}
               target="_blank"

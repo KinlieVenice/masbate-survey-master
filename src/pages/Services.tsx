@@ -2,6 +2,7 @@ import { Link } from "react-router-dom";
 import { ArrowRight } from "lucide-react";
 import { SERVICES } from "@/lib/services";
 import { FacebookCTA } from "@/components/site/FacebookCTA";
+import surveyor from "@/assets/ranola-building.jpeg";
 import { cn } from "@/lib/utils";
 import topo from "@/assets/topo-map.jpg";
 
@@ -54,13 +55,35 @@ const Services = () => {
       </section>
 
       <section className="relative overflow-hidden">
-        <img src={topo} alt="" className="absolute inset-0 h-full w-full object-cover opacity-15" loading="lazy" />
-        <div className="absolute inset-0 bg-gradient-to-b from-primary/90 via-primary/95 to-primary" />
-        <div className="container relative py-20 md:py-28 text-center">
-          <p className="text-primary-foreground/75 mb-6">Not sure which survey you need?</p>
-          <FacebookCTA variant="light" label="Ask us on Facebook" />
+        {/* Background */}
+        <img
+          src={surveyor}
+          alt=""
+          className="absolute inset-0 h-full w-full object-cover opacity-15"
+          loading="lazy"
+        />
+
+        <div className="absolute inset-0 bg-gradient-to-b from-primary/80 via-primary/85 to-primary/90" />
+
+        {/* Content */}
+        <div className="container relative py-16 md:py-20 flex justify-center">
+          
+          <div className="bg-white/95 backdrop-blur-sm rounded-xl px-8 py-10 md:px-14 md:py-10 text-center shadow-lg max-w-2xl w-full">
+
+            <h2 className="font-serif text-foreground text-2xl md:text-3xl leading-tight mb-4">
+              Not sure which service you need?
+            </h2>
+
+            <p className="text-muted-foreground text-sm md:text-base mb-6 max-w-md mx-auto">
+              Send your documents and questions — we’ll guide you on the next step.
+            </p>
+
+            <FacebookCTA variant="primary" />
+
+          </div>
         </div>
       </section>
+
     </>
   );
 };

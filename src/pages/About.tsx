@@ -1,6 +1,6 @@
 import surveyor from "@/assets/ranola-building.jpeg";
 import teamRam from "@/assets/team-ram.png";
-import teamRacel from "@/assets/team-racel.png";
+import teamRacel from "@/assets/engr-racel.jpg";
 import { FacebookCTA } from "@/components/site/FacebookCTA";
 
 const About = () => {
@@ -103,7 +103,7 @@ const About = () => {
           </div>
           <div className="md:col-span-7">
             <figure className="flex items-start gap-6">
-              <div className="relative h-36 w-36 sm:h-44 sm:w-44 shrink-0 rounded-sm overflow-hidden bg-secondary">
+              <div className="relative h-[220px] w-[220px] sm:h-[260px] sm:w-[260px] shrink-0 rounded-sm overflow-hidden bg-secondary">
                 <img
                   src={teamRam}
                   alt="Ram Cedrick A. Rañola"
@@ -138,7 +138,7 @@ const About = () => {
               <figure key={member.name} className="flex flex-col">
                 <div className="relative aspect-[4/5] w-full max-w-[200px] rounded-sm overflow-hidden bg-secondary mb-4">
                   <img
-                    src="/placeholder.svg"
+                    src="src/assets/engr.jpg"
                     alt={member.name}
                     loading="lazy"
                     className="absolute inset-0 h-full w-full object-cover"
@@ -160,13 +160,50 @@ const About = () => {
 
       {/* CTA */}
       <section className="relative overflow-hidden">
-        <img src={surveyor} alt="" className="absolute inset-0 h-full w-full object-cover opacity-15" loading="lazy" />
-        <div className="absolute inset-0 bg-gradient-to-b from-primary/90 via-primary/95 to-primary" />
-        <div className="container relative py-20 md:py-28 text-center">
-          <h2 className="font-serif text-3xl md:text-4xl mb-6 text-balance text-primary-foreground">Talk to us about your land.</h2>
-          <FacebookCTA variant="light" />
-        </div>
+        {/* Background */}
+        <img
+          src={surveyor}
+          alt=""
+          className="absolute inset-0 h-full w-full object-cover opacity-15"
+          loading="lazy"
+        />
+
+        <div className="absolute inset-0 bg-gradient-to-b from-primary/80 via-primary/85 to-primary/90" />
+
+        {/* Content */}
+        <section className="relative overflow-hidden">
+          {/* Background */}
+          <img
+            src={surveyor}
+            alt=""
+            className="absolute inset-0 h-full w-full object-cover opacity-15"
+            loading="lazy"
+          />
+
+          <div className="absolute inset-0 bg-gradient-to-b from-primary/80 via-primary/85 to-primary/90" />
+
+          {/* Content */}
+          <div className="container relative py-16 md:py-20 flex justify-center">
+            
+            <div className="bg-white/95 backdrop-blur-sm rounded-xl px-8 py-10 md:px-14 md:py-10 text-center shadow-lg max-w-2xl w-full">
+
+              <h2 className="font-serif text-foreground text-2xl md:text-3xl leading-tight mb-4">
+                Talk to us about your land.
+              </h2>
+
+              <p className="text-muted-foreground text-sm md:text-base mb-6 max-w-md mx-auto">
+                Send your documents and questions — we’ll guide you on the next step.
+              </p>
+
+              <FacebookCTA variant="primary" />
+
+            </div>
+          </div>
+        </section>
+
       </section>
+
+
     </>
   );
 };

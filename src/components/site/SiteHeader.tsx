@@ -38,7 +38,7 @@ export const SiteHeader = () => {
     >
       <div className="container flex items-center justify-between h-16 md:h-20">
         <Link to="/" className="flex items-center gap-3 group">
-          <div className="h-10 w-10 rounded-sm overflow-hidden bg-primary grid place-items-center">
+          <div className="h-14 w-14 rounded-sm overflow-hidden bg-primary grid place-items-center">
             <img src={logo} alt="Rañola Surveying Services" className="h-full w-full object-cover" />
           </div>
           <div className="leading-none">

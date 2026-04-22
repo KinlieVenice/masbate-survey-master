@@ -1,4 +1,6 @@
 import { HelpCircle } from "lucide-react";
+import surveyor from "@/assets/ranola-building.jpeg";
+import { FacebookCTA } from "@/components/site/FacebookCTA";
 
 const FAQ = () => {
   const faqs = [
@@ -66,15 +68,36 @@ const FAQ = () => {
             ))}
           </div>
 
-          <div className="mt-12 text-center">
-            <p className="text-muted-foreground mb-4">Still have questions?</p>
-            <a 
-              href="/contact" 
-              className="inline-flex items-center gap-2 px-6 py-3 text-sm font-medium tracking-wide text-primary-foreground bg-primary hover:bg-primary/90 transition-colors"
-            >
-              Contact us
-            </a>
-          </div>
+          <section className="relative overflow-hidden">
+            {/* Background */}
+            <img
+              src={surveyor}
+              alt=""
+              className="absolute inset-0 h-full w-full object-cover opacity-15"
+              loading="lazy"
+            />
+
+            <div className="absolute inset-0 bg-gradient-to-b from-primary/80 via-primary/85 to-primary/90" />
+
+            {/* Content */}
+            <div className="container relative py-16 md:py-20 flex justify-center">
+              
+              <div className="bg-white/95 backdrop-blur-sm rounded-xl px-8 py-10 md:px-14 md:py-10 text-center shadow-lg max-w-2xl w-full">
+
+                <h2 className="font-serif text-foreground text-2xl md:text-3xl leading-tight mb-4">
+                  Talk to us about your land.
+                </h2>
+
+                <p className="text-muted-foreground text-sm md:text-base mb-6 max-w-md mx-auto">
+                  Send your documents and questions — we’ll guide you on the next step.
+                </p>
+
+                <FacebookCTA variant="default" />
+
+              </div>
+            </div>
+          </section>
+
         </div>
       </section>
     </>
