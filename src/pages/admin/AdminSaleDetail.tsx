@@ -275,6 +275,13 @@ const AdminSaleDetail = () => {
               {sale.checklist.filter(Boolean).length} of {sale.checklist.length} complete
             </div>
           </Card>
+
+          {sale.remarks && (
+            <Card className="p-6">
+              <h3 className="font-serif text-lg mb-3">Remarks</h3>
+              <p className="text-sm text-foreground/85 whitespace-pre-wrap leading-relaxed">{sale.remarks}</p>
+            </Card>
+          )}
         </div>
       </div>
 

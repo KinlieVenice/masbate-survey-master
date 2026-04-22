@@ -82,7 +82,7 @@ const AdminSales = () => {
                       <span className="text-muted-foreground/50 italic text-xs">Not set</span>
                     )}
                   </td>
-                  <td className="py-3 px-2 text-muted-foreground">{format(new Date(s.surveyingDay), "MMM d, yyyy")}</td>
+                  <td className="py-3 px-2 text-muted-foreground whitespace-nowrap">{format(new Date(s.surveyingDay), "MMM d, yyyy")} <span className="text-foreground/70">· {format(new Date(s.surveyingDay), "h:mm a")}</span></td>
                   <td className="py-3 px-2 text-right">{peso(s.totalAmount)}</td>
                   <td className="py-3 px-2 text-right">{peso(s.paidAmount)}</td>
                   <td className="py-3 px-2">
@@ -118,7 +118,7 @@ const AdminSales = () => {
                 <Link to={`/ranola-admin/sales/${s.id}`} className="font-medium text-foreground">{s.clientName}</Link>
                 <Badge variant="outline" className={statusVariant(s.status)}>{s.status}</Badge>
               </div>
-              <div className="text-xs text-muted-foreground mb-2">{format(new Date(s.surveyingDay), "MMM d, yyyy")}</div>
+              <div className="text-xs text-muted-foreground mb-2">{format(new Date(s.surveyingDay), "MMM d, yyyy")} · {format(new Date(s.surveyingDay), "h:mm a")}</div>
               {s.location && (
                 <div className="flex items-start gap-1.5 text-xs text-muted-foreground mb-3">
                   <MapPin className="h-3.5 w-3.5 mt-0.5 text-primary shrink-0" />
