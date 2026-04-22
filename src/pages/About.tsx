@@ -255,7 +255,7 @@ const About = () => {
           <div className="bg-white/95 backdrop-blur-sm rounded-xl px-8 py-10 md:px-14 md:py-10 text-center shadow-lg max-w-2xl w-full">
 
             <h2 className="font-serif text-foreground text-2xl md:text-3xl leading-tight mb-4">
-              Not sure which service you need?
+              Talk to us about your land.
             </h2>
 
             <p className="text-muted-foreground text-sm md:text-base mb-6 max-w-md mx-auto">
