@@ -59,9 +59,17 @@ const About = () => {
         </div>
       </section>
 
-      {/* Owner — featured */}
-      <section className="bg-secondary/40 border-y border-border">
-        <div className="container py-20 md:py-28">
+      {/* Owner — featured editorial */}
+      <section className="relative bg-secondary/40 border-y border-border overflow-hidden">
+        {/* Decorative oversized type */}
+        <div
+          aria-hidden
+          className="pointer-events-none absolute -top-6 right-4 md:right-12 font-serif text-[120px] md:text-[220px] leading-none text-primary/5 select-none"
+        >
+          01
+        </div>
+
+        <div className="container relative py-20 md:py-28">
           <div className="max-w-2xl mb-12 md:mb-16">
             <div className="text-xs uppercase tracking-[0.25em] text-primary mb-4">Leadership</div>
             <h2 className="font-serif text-3xl md:text-5xl text-foreground leading-[1.1] text-balance">
@@ -70,7 +78,9 @@ const About = () => {
           </div>
 
           <div className="grid md:grid-cols-12 gap-10 md:gap-16 items-center">
-            <div className="md:col-span-5 lg:col-span-4">
+            <div className="md:col-span-5 lg:col-span-4 relative">
+              {/* Offset frame accent */}
+              <div className="absolute -inset-3 md:-inset-4 border border-primary/30 rounded-sm translate-x-3 translate-y-3 md:translate-x-4 md:translate-y-4" />
               <div className="relative aspect-[4/5] rounded-sm overflow-hidden shadow-deep max-w-[220px] sm:max-w-[260px] md:max-w-none mx-auto">
                 <img
                   src={teamRacel}
@@ -98,109 +108,132 @@ const About = () => {
         </div>
       </section>
 
-      {/* Team */}
-      <section className="container py-16 md:py-24">
-        <div className="grid md:grid-cols-12 gap-10 items-start mb-14 md:mb-20">
-          <div className="md:col-span-5">
-            <div className="text-xs uppercase tracking-[0.25em] text-muted-foreground mb-4">The team</div>
-            <h2 className="font-serif text-2xl md:text-3xl text-foreground leading-tight text-balance max-w-sm">
-              Working alongside Engr. Rañola.
-            </h2>
-          </div>
-        <div className="md:col-span-7">
-          
-          {/* Team row */}
-          <div className="flex flex-col gap-10">
-
-            {/* Person 1 */}
-            <figure className="flex items-start gap-6">
-              <div className="relative h-[200px] w-[200px] sm:h-[240px] sm:w-[240px] shrink-0 rounded-sm overflow-hidden bg-secondary">
-                <img
-                  src={teamRam}
-                  alt="Ram Cedrick A. Rañola"
-                  loading="lazy"
-                  className="absolute inset-0 h-full w-full object-cover"
-                />
-              </div>
-
-              <figcaption className="pt-1">
-                <h3 className="font-serif text-xl text-foreground leading-tight">
-                  Ram Cedrick A. Rañola
-                </h3>
-
-                <p className="text-[11px] uppercase tracking-[0.2em] text-muted-foreground mt-2 mb-3">
-                  Facebook Admin Manager · Secretary
-                </p>
-
-                <p className="text-sm text-muted-foreground leading-relaxed max-w-sm">
-                 Manages our digital presence and client intake, bridging the gap between our online community and our technical surveying services.
-                </p>
-              </figcaption>
-            </figure>
-
-            {/* Person 2 */}
-            <figure className="flex items-start gap-6">
-              <div className="relative h-[200px] w-[200px] sm:h-[240px] sm:w-[240px] shrink-0 rounded-sm overflow-hidden bg-secondary">
-                <img
-                  src={teamJonalyn}
-                  alt="Jonalyn C. Sampaga"
-                  loading="lazy"
-                  className="absolute inset-0 h-full w-full object-cover"
-                />
-              </div>
-
-              <figcaption className="pt-1">
-                <h3 className="font-serif text-xl text-foreground leading-tight">
-                  Jonalyn C. Sampaga
-                </h3>
-
-                <p className="text-[11px] uppercase tracking-[0.2em] text-muted-foreground mt-2 mb-3">
-                  Secretary
-                </p>
-
-                <p className="text-sm text-muted-foreground leading-relaxed max-w-sm">
-                  Optimizes office workflows and manages documentation, ensuring the administrative side of every land survey is executed flawlessly.
-                </p>
-              </figcaption>
-            </figure>
-
-          </div>
+      {/* Working alongside — split editorial cards */}
+      <section className="relative container py-20 md:py-28 overflow-hidden">
+        <div
+          aria-hidden
+          className="pointer-events-none absolute -top-2 left-2 md:left-4 font-serif text-[120px] md:text-[200px] leading-none text-primary/5 select-none"
+        >
+          02
         </div>
 
-
+        <div className="relative max-w-2xl mb-14 md:mb-20">
+          <div className="text-xs uppercase tracking-[0.25em] text-primary mb-4">Working alongside</div>
+          <h2 className="font-serif text-3xl md:text-4xl text-foreground leading-tight text-balance">
+            The team behind the desk.
+          </h2>
         </div>
 
-        {/* Survey Aids */}
-        <div className="border-t border-border pt-14 md:pt-20">
-          <div className="text-xs uppercase tracking-[0.25em] text-muted-foreground mb-8">Survey Aids</div>
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-8 md:gap-10">
-            {[
-              { name: "Danilo Rañola", role: "Survey Aid", pic: "src/assets/danilo.jpeg" },
-              { name: "Nelmar Maglente", role: "Survey Aid", pic: "src/assets/nelmar.jpg" },
-              { name: "Christian Viterbo", role: "Survey Aid", pic: "src/assets/christian.jpeg" },
-              { name: "Jhong Gadayan", role: "Survey Aid", pic: "src/assets/jhong.jpeg" },
-              { name: "Julio Rañola", role: "Survey Aid", pic: "src/assets/julio.jpeg" },
-            ].map((member) => (
-              <figure key={member.name} className="flex flex-col">
-                <div className="relative aspect-[4/5] w-full max-w-[200px] rounded-sm overflow-hidden bg-secondary mb-4">
+        <div className="relative grid md:grid-cols-2 gap-x-10 lg:gap-x-20 gap-y-16 md:gap-y-0">
+          {[
+            {
+              name: "Ram Cedrick A. Rañola",
+              role: "Facebook Admin Manager · Secretary",
+              pic: teamRam,
+              blurb:
+                "Manages our digital presence and client intake, bridging the gap between our online community and our technical surveying services.",
+            },
+            {
+              name: "Jonalyn C. Sampaga",
+              role: "Secretary",
+              pic: teamJonalyn,
+              blurb:
+                "Optimizes office workflows and manages documentation, ensuring the administrative side of every land survey is executed flawlessly.",
+            },
+          ].map((m, i) => (
+            <article
+              key={m.name}
+              className={`relative md:pt-10 ${i === 1 ? "md:mt-24" : ""}`}
+            >
+              {/* Top accent bar */}
+              <div className="absolute top-0 left-0 h-px w-16 bg-primary/50" />
+              <div className="flex flex-col sm:flex-row gap-6">
+                <div className="relative h-[180px] w-[180px] sm:h-[200px] sm:w-[200px] shrink-0 rounded-sm overflow-hidden bg-secondary shadow-elevated">
                   <img
-                    src={member.pic}
-                    alt={member.name}
+                    src={m.pic}
+                    alt={m.name}
                     loading="lazy"
                     className="absolute inset-0 h-full w-full object-cover"
                   />
                 </div>
-                <figcaption>
-                  <h4 className="font-serif text-lg text-foreground leading-tight">
-                    {member.name}
-                  </h4>
-                  <p className="text-[11px] uppercase tracking-[0.2em] text-muted-foreground mt-2">
-                    {member.role}
+                <div className="flex-1 pt-1">
+                  <h3 className="font-serif text-2xl text-foreground leading-tight mb-2">
+                    {m.name}
+                  </h3>
+                  <p className="text-[11px] uppercase tracking-[0.2em] text-primary/80 mb-4">
+                    {m.role}
                   </p>
-                </figcaption>
-              </figure>
-            ))}
+                  <p className="text-sm text-muted-foreground leading-relaxed">
+                    {m.blurb}
+                  </p>
+                </div>
+              </div>
+            </article>
+          ))}
+        </div>
+      </section>
+
+      {/* Survey Aids — dark band with overlapping portraits */}
+      <section className="relative bg-gradient-forest text-primary-foreground overflow-hidden">
+        <div
+          aria-hidden
+          className="pointer-events-none absolute -bottom-8 right-4 md:right-12 font-serif text-[120px] md:text-[220px] leading-none text-primary-foreground/5 select-none"
+        >
+          03
+        </div>
+
+        <div className="container relative py-20 md:py-28">
+          <div className="grid md:grid-cols-12 gap-10 mb-14 md:mb-16">
+            <div className="md:col-span-5">
+              <div className="text-xs uppercase tracking-[0.25em] text-primary-foreground/60 mb-4">
+                The field
+              </div>
+              <h2 className="font-serif text-3xl md:text-4xl leading-tight text-balance">
+                Survey Aids.
+              </h2>
+            </div>
+            <div className="md:col-span-6 md:col-start-7 self-end">
+              <p className="text-primary-foreground/70 leading-relaxed text-sm md:text-base max-w-md">
+                The hands and feet of every survey — clearing lines of sight, holding rods,
+                walking boundaries with us through rain and heat.
+              </p>
+            </div>
           </div>
+
+          {/* Staggered portrait strip */}
+          <ul className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-x-4 sm:gap-x-6 gap-y-10">
+            {[
+              { name: "Danilo Rañola", pic: danilo },
+              { name: "Nelmar Maglente", pic: nelmar },
+              { name: "Christian Viterbo", pic: christian },
+              { name: "Jhong Gadayan", pic: jhong },
+              { name: "Julio Rañola", pic: julio },
+            ].map((member, i) => (
+              <li
+                key={member.name}
+                className={`group ${i % 2 === 1 ? "lg:translate-y-8" : ""}`}
+              >
+                <div className="relative aspect-[3/4] w-full rounded-sm overflow-hidden bg-primary-foreground/10 mb-4">
+                  <img
+                    src={member.pic}
+                    alt={member.name}
+                    loading="lazy"
+                    className="absolute inset-0 h-full w-full object-cover grayscale group-hover:grayscale-0 transition-all duration-500"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-primary/60 via-transparent to-transparent" />
+                  <div className="absolute bottom-3 left-3 text-[10px] uppercase tracking-[0.2em] text-primary-foreground/70">
+                    0{i + 1}
+                  </div>
+                </div>
+                <h4 className="font-serif text-base md:text-lg leading-tight">
+                  {member.name}
+                </h4>
+                <p className="text-[10px] uppercase tracking-[0.2em] text-primary-foreground/50 mt-1">
+                  Survey Aid
+                </p>
+              </li>
+            ))}
+          </ul>
         </div>
       </section>
 
