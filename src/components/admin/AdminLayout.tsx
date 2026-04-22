@@ -9,6 +9,11 @@ import {
   LogOut,
   Menu,
   X,
+  Users,
+  FolderKanban,
+  HardHat,
+  Wrench,
+  FileText,
 } from "lucide-react";
 import { currentUser, signOut } from "@/lib/adminStore";
 import logo from "@/assets/ranola-logo.jpg";
@@ -20,6 +25,11 @@ const items = [
   { to: "/ranola-admin/sales", label: "Sales", icon: Receipt },
   { to: "/ranola-admin/expenses", label: "Expenses", icon: Wallet },
   { to: "/ranola-admin/reports", label: "Reports", icon: BarChart3 },
+  { to: "/ranola-admin/clients", label: "Clients", icon: Users },
+  { to: "/ranola-admin/projects", label: "Projects", icon: FolderKanban },
+  { to: "/ranola-admin/teams", label: "Survey Teams", icon: HardHat },
+  { to: "/ranola-admin/equipment", label: "Equipment", icon: Wrench },
+  { to: "/ranola-admin/billing", label: "Billing", icon: FileText },
 ];
 
 export const AdminLayout = () => {

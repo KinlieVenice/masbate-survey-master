@@ -51,6 +51,11 @@ export const EXPENSE_CATEGORIES = ["Labor", "Overhead", "Equipment", "Transport"
 
 const SALES_KEY = "ranola_sales_v2";
 const EXPENSES_KEY = "ranola_expenses_v1";
+const CLIENTS_KEY = "ranola_clients_v1";
+const PROJECTS_KEY = "ranola_projects_v1";
+const TEAMS_KEY = "ranola_teams_v1";
+const EQUIPMENT_KEY = "ranola_equipment_v1";
+const INVOICES_KEY = "ranola_invoices_v1";
 const AUTH_KEY = "ranola_admin_auth";
 const USERS_KEY = "ranola_admin_users";
 
@@ -197,6 +202,253 @@ export const upsertExpense = (e: Omit<Expense, "id"> & { id?: string }) => {
 
 export const deleteExpense = (id: string) => {
   save(EXPENSES_KEY, load<Expense[]>(EXPENSES_KEY, []).filter((e) => e.id !== id));
+};
+
+// Clients
+export type Client = {
+  id: string;
+  name: string;
+  email?: string;
+  phone?: string;
+  address?: string;
+  tin?: string;
+  notes?: string;
+  createdAt: string;
+};
+
+export const listClients = (): Client[] =>
+  load<Client[]>(CLIENTS_KEY, []).sort((a, b) => a.name.localeCompare(b.name));
+
+export const getClient = (id: string) => listClients().find((c) => c.id === id);
+
+export const upsertClient = (c: Omit<Client, "id" | "createdAt"> & { id?: string }) => {
+  const all = load<Client[]>(CLIENTS_KEY, []);
+  if (c.id) {
+    const idx = all.findIndex((x) => x.id === c.id);
+    if (idx >= 0) all[idx] = { ...all[idx], ...c };
+  } else {
+    all.push({ ...c, id: uid(), createdAt: new Date().toISOString() });
+  }
+  save(CLIENTS_KEY, all);
+};
+
+export const deleteClient = (id: string) => {
+  save(CLIENTS_KEY, load<Client[]>(CLIENTS_KEY, []).filter((c) => c.id !== id));
+};
+
+// Projects
+export type SurveyType =
+  | "Relocation Survey"
+  | "Subdivision"
+  | "Topographic"
+  | "Boundary"
+  | "Construction"
+  | "Other";
+
+export type ProjectStatus = "Pending" | "On-Site" | "Completed";
+
+export type Project = {
+  id: string;
+  clientId: string;
+  clientName: string;
+  title: string;
+  location: string;
+  surveyType: SurveyType;
+  status: ProjectStatus;
+  assignedTeamId?: string;
+  surveyingDate: string;
+  deadline?: string;
+  totalAmount: number;
+  paidAmount: number;
+  checklist: boolean[];
+  files: SaleFile[];
+  remarks?: string;
+  createdAt: string;
+};
+
+export const listProjects = (): Project[] =>
+  load<Project[]>(PROJECTS_KEY, []).sort((a, b) => +new Date(b.surveyingDate) - +new Date(a.surveyingDate));
+
+export const getProject = (id: string) => listProjects().find((p) => p.id === id);
+
+export const upsertProject = (p: Omit<Project, "id" | "createdAt"> & { id?: string }) => {
+  const all = load<Project[]>(PROJECTS_KEY, []);
+  if (p.id) {
+    const idx = all.findIndex((x) => x.id === p.id);
+    if (idx >= 0) all[idx] = { ...all[idx], ...p };
+  } else {
+    all.push({ ...p, id: uid(), createdAt: new Date().toISOString() });
+  }
+  save(PROJECTS_KEY, all);
+};
+
+export const deleteProject = (id: string) => {
+  save(PROJECTS_KEY, load<Project[]>(PROJECTS_KEY, []).filter((p) => p.id !== id));
+};
+
+// Teams
+export type TeamMemberRole = "Party Chief" | "Instrumentman" | "Rodman" | "Helper" | "Other";
+
+export type TeamMember = {
+  id: string;
+  name: string;
+  role: TeamMemberRole;
+  phone?: string;
+};
+
+export type TeamStatus = "Available" | "Deployed" | "Offline";
+
+export type Team = {
+  id: string;
+  name: string;
+  leaderId: string;
+  members: TeamMember[];
+  status: TeamStatus;
+  notes?: string;
+  createdAt: string;
+};
+
+export const listTeams = (): Team[] =>
+  load<Team[]>(TEAMS_KEY, []).sort((a, b) => a.name.localeCompare(b.name));
+
+export const getTeam = (id: string) => listTeams().find((t) => t.id === id);
+
+export const upsertTeam = (t: Omit<Team, "id" | "createdAt"> & { id?: string }) => {
+  const all = load<Team[]>(TEAMS_KEY, []);
+  if (t.id) {
+    const idx = all.findIndex((x) => x.id === t.id);
+    if (idx >= 0) all[idx] = { ...all[idx], ...t };
+  } else {
+    all.push({ ...t, id: uid(), createdAt: new Date().toISOString() });
+  }
+  save(TEAMS_KEY, all);
+};
+
+export const deleteTeam = (id: string) => {
+  save(TEAMS_KEY, load<Team[]>(TEAMS_KEY, []).filter((t) => t.id !== id));
+};
+
+// Equipment
+export type EquipmentType = "GPS" | "Total Station" | "Theodolite" | "Level" | "Drone" | "Other";
+
+export type EquipmentCondition = "Good" | "Needs Maintenance" | "Out of Service";
+
+export type MaintenanceLog = {
+  id: string;
+  date: string;
+  description: string;
+  cost?: number;
+};
+
+export type Equipment = {
+  id: string;
+  name: string;
+  type: EquipmentType;
+  serialNumber?: string;
+  condition: EquipmentCondition;
+  assignedTeamId?: string;
+  lastCalibration?: string;
+  maintenanceLogs: MaintenanceLog[];
+  notes?: string;
+  createdAt: string;
+};
+
+export const listEquipment = (): Equipment[] =>
+  load<Equipment[]>(EQUIPMENT_KEY, []).sort((a, b) => a.name.localeCompare(b.name));
+
+export const getEquipment = (id: string) => listEquipment().find((e) => e.id === id);
+
+export const upsertEquipment = (e: Omit<Equipment, "id" | "createdAt"> & { id?: string }) => {
+  const all = load<Equipment[]>(EQUIPMENT_KEY, []);
+  if (e.id) {
+    const idx = all.findIndex((x) => x.id === e.id);
+    if (idx >= 0) all[idx] = { ...all[idx], ...e };
+  } else {
+    all.push({ ...e, id: uid(), createdAt: new Date().toISOString() });
+  }
+  save(EQUIPMENT_KEY, all);
+};
+
+export const deleteEquipment = (id: string) => {
+  save(EQUIPMENT_KEY, load<Equipment[]>(EQUIPMENT_KEY, []).filter((e) => e.id !== id));
+};
+
+// Invoices
+export type PaymentMethod = "Cash" | "Bank Transfer" | "GCash" | "Check" | "Other";
+
+export type Payment = {
+  id: string;
+  date: string;
+  amount: number;
+  method: PaymentMethod;
+  reference?: string;
+  notes?: string;
+};
+
+export type InvoiceScope = "client" | "project";
+
+export type InvoiceStatus = "Unpaid" | "Partial" | "Paid" | "Overdue";
+
+export type Invoice = {
+  id: string;
+  invoiceNumber: string;
+  scope: InvoiceScope;
+  clientId: string;
+  projectId?: string;
+  amount: number;
+  dueDate?: string;
+  payments: Payment[];
+  status: InvoiceStatus;
+  notes?: string;
+  createdAt: string;
+};
+
+const getNextInvoiceNumber = (): string => {
+  const all = load<Invoice[]>(INVOICES_KEY, []);
+  const year = new Date().getFullYear();
+  const prefix = `INV-${year}-`;
+  const existing = all
+    .map((inv) => {
+      const num = inv.invoiceNumber.replace(prefix, "");
+      return parseInt(num, 10) || 0;
+    })
+    .filter(Boolean);
+  const next = existing.length === 0 ? 1 : Math.max(...existing) + 1;
+  return `${prefix}${String(next).padStart(4, "0")}`;
+};
+
+export const computeInvoiceStatus = (amount: number, payments: Payment[]): InvoiceStatus => {
+  const totalPaid = payments.reduce((sum, p) => sum + p.amount, 0);
+  if (totalPaid <= 0) return "Unpaid";
+  if (totalPaid >= amount) return "Paid";
+  return "Partial";
+};
+
+export const listInvoices = (): Invoice[] =>
+  load<Invoice[]>(INVOICES_KEY, []).sort((a, b) => +new Date(b.createdAt) - +new Date(a.createdAt));
+
+export const getInvoice = (id: string) => listInvoices().find((inv) => inv.id === id);
+
+export const upsertInvoice = (inv: Omit<Invoice, "id" | "invoiceNumber" | "status" | "createdAt"> & { id?: string }) => {
+  const all = load<Invoice[]>(INVOICES_KEY, []);
+  const status = computeInvoiceStatus(inv.amount, inv.payments);
+  if (inv.id) {
+    const idx = all.findIndex((x) => x.id === inv.id);
+    if (idx >= 0) all[idx] = { ...all[idx], ...inv, status };
+  } else {
+    all.push({
+      ...inv,
+      id: uid(),
+      invoiceNumber: getNextInvoiceNumber(),
+      status,
+      createdAt: new Date().toISOString(),
+    });
+  }
+  save(INVOICES_KEY, all);
+};
+
+export const deleteInvoice = (id: string) => {
+  save(INVOICES_KEY, load<Invoice[]>(INVOICES_KEY, []).filter((inv) => inv.id !== id));
 };
 
 // Auth
