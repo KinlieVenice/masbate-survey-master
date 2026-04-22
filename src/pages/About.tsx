@@ -1,6 +1,7 @@
 import surveyor from "@/assets/ranola-building.jpeg";
 import teamRam from "@/assets/team-ram.png";
 import teamRacel from "@/assets/engr-racel.jpg";
+import teamJonalyn from "@/assets/jonalyn.jpg";
 import { FacebookCTA } from "@/components/site/FacebookCTA";
 
 const About = () => {
@@ -101,9 +102,14 @@ const About = () => {
               Working alongside Engr. Rañola.
             </h2>
           </div>
-          <div className="md:col-span-7">
+        <div className="md:col-span-7">
+          
+          {/* Team row */}
+          <div className="flex flex-col gap-10">
+
+            {/* Person 1 */}
             <figure className="flex items-start gap-6">
-              <div className="relative h-[220px] w-[220px] sm:h-[260px] sm:w-[260px] shrink-0 rounded-sm overflow-hidden bg-secondary">
+              <div className="relative h-[200px] w-[200px] sm:h-[240px] sm:w-[240px] shrink-0 rounded-sm overflow-hidden bg-secondary">
                 <img
                   src={teamRam}
                   alt="Ram Cedrick A. Rañola"
@@ -111,19 +117,52 @@ const About = () => {
                   className="absolute inset-0 h-full w-full object-cover"
                 />
               </div>
+
               <figcaption className="pt-1">
                 <h3 className="font-serif text-xl text-foreground leading-tight">
                   Ram Cedrick A. Rañola
                 </h3>
+
                 <p className="text-[11px] uppercase tracking-[0.2em] text-muted-foreground mt-2 mb-3">
                   Facebook Admin Manager · Secretary
                 </p>
+
                 <p className="text-sm text-muted-foreground leading-relaxed max-w-sm">
-                  Supports the practice by managing inquiries and keeping operations organized behind the scenes.
+                 Manages our digital presence and client intake, bridging the gap between our online community and our technical surveying services.
                 </p>
               </figcaption>
             </figure>
+
+            {/* Person 2 */}
+            <figure className="flex items-start gap-6">
+              <div className="relative h-[200px] w-[200px] sm:h-[240px] sm:w-[240px] shrink-0 rounded-sm overflow-hidden bg-secondary">
+                <img
+                  src={teamJonalyn}
+                  alt="Jonalyn C. Sampaga"
+                  loading="lazy"
+                  className="absolute inset-0 h-full w-full object-cover"
+                />
+              </div>
+
+              <figcaption className="pt-1">
+                <h3 className="font-serif text-xl text-foreground leading-tight">
+                  Jonalyn C. Sampaga
+                </h3>
+
+                <p className="text-[11px] uppercase tracking-[0.2em] text-muted-foreground mt-2 mb-3">
+                  Secretary
+                </p>
+
+                <p className="text-sm text-muted-foreground leading-relaxed max-w-sm">
+                  Optimizes office workflows and manages documentation, ensuring the administrative side of every land survey is executed flawlessly.
+                </p>
+              </figcaption>
+            </figure>
+
           </div>
+        </div>
+
+
         </div>
 
         {/* Survey Aids */}
@@ -131,14 +170,16 @@ const About = () => {
           <div className="text-xs uppercase tracking-[0.25em] text-muted-foreground mb-8">Survey Aids</div>
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-8 md:gap-10">
             {[
-              { name: "Juan D. Bautista", role: "Survey Aid" },
-              { name: "Mario L. Santos", role: "Survey Aid" },
-              { name: "Pedro M. Cruz", role: "Survey Aid" },
+              { name: "Danilo Rañola", role: "Survey Aid", pic: "src/assets/danilo.jpeg" },
+              { name: "Nelmar Maglente", role: "Survey Aid", pic: "src/assets/nelmar.jpg" },
+              { name: "Christian Viterbo", role: "Survey Aid", pic: "src/assets/christian.jpeg" },
+              { name: "Jhong Gadayan", role: "Survey Aid", pic: "src/assets/jhong.jpeg" },
+              { name: "Julio Rañola", role: "Survey Aid", pic: "src/assets/julio.jpeg" },
             ].map((member) => (
               <figure key={member.name} className="flex flex-col">
                 <div className="relative aspect-[4/5] w-full max-w-[200px] rounded-sm overflow-hidden bg-secondary mb-4">
                   <img
-                    src="src/assets/engr.jpg"
+                    src={member.pic}
                     alt={member.name}
                     loading="lazy"
                     className="absolute inset-0 h-full w-full object-cover"

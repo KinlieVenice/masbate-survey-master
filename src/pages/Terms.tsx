@@ -1,4 +1,7 @@
 import { FileText, AlertCircle, CheckCircle, Shield, Wallet } from "lucide-react";
+import { FacebookCTA } from "@/components/site/FacebookCTA";
+import surveyor from "@/assets/ranola-building.jpeg";
+
 
 const Terms = () => {
   return (
@@ -75,7 +78,38 @@ const Terms = () => {
             </div>
           </div>
         </div>
+
       </section>
+      <section className="relative overflow-hidden">
+        {/* Background */}
+        <img
+          src={surveyor}
+          alt=""
+          className="absolute inset-0 h-full w-full object-cover opacity-15"
+          loading="lazy"
+        />
+
+        <div className="absolute inset-0 bg-gradient-to-b from-primary/80 via-primary/85 to-primary/90" />
+
+        {/* Content */}
+        <div className="container relative py-12 md:py-14 flex justify-center">
+
+          <div className="bg-white/95 backdrop-blur-sm rounded-xl px-6 py-7 md:px-10 md:py-8 text-center shadow-lg max-w-2xl w-full">
+
+            <h2 className="font-serif text-foreground text-2xl md:text-3xl leading-tight mb-3">
+              Still have questions?
+            </h2>
+
+            <p className="text-muted-foreground text-sm md:text-base mb-5 max-w-md mx-auto">
+              Send your documents and questions — we’ll guide you on the next step.
+            </p>
+
+            <FacebookCTA variant="primary" />
+
+          </div>
+        </div>
+      </section>
+
     </>
   );
 };

@@ -1,6 +1,7 @@
 import { HelpCircle } from "lucide-react";
-import surveyor from "@/assets/ranola-building.jpeg";
 import { FacebookCTA } from "@/components/site/FacebookCTA";
+import surveyor from "@/assets/ranola-building.jpeg";
+
 
 const FAQ = () => {
   const faqs = [
@@ -68,36 +69,37 @@ const FAQ = () => {
             ))}
           </div>
 
-          <section className="relative overflow-hidden">
-            {/* Background */}
-            <img
-              src={surveyor}
-              alt=""
-              className="absolute inset-0 h-full w-full object-cover opacity-15"
-              loading="lazy"
-            />
+          
+        </div>
+        
+      </section>
+      <section className="relative overflow-hidden">
+        {/* Background */}
+        <img
+          src={surveyor}
+          alt=""
+          className="absolute inset-0 h-full w-full object-cover opacity-15"
+          loading="lazy"
+        />
 
-            <div className="absolute inset-0 bg-gradient-to-b from-primary/80 via-primary/85 to-primary/90" />
+        <div className="absolute inset-0 bg-gradient-to-b from-primary/80 via-primary/85 to-primary/90" />
 
-            {/* Content */}
-            <div className="container relative py-16 md:py-20 flex justify-center">
-              
-              <div className="bg-white/95 backdrop-blur-sm rounded-xl px-8 py-10 md:px-14 md:py-10 text-center shadow-lg max-w-2xl w-full">
+        {/* Content */}
+        <div className="container relative py-12 md:py-14 flex justify-center">
 
-                <h2 className="font-serif text-foreground text-2xl md:text-3xl leading-tight mb-4">
-                  Talk to us about your land.
-                </h2>
+          <div className="bg-white/95 backdrop-blur-sm rounded-xl px-6 py-7 md:px-10 md:py-8 text-center shadow-lg max-w-2xl w-full">
 
-                <p className="text-muted-foreground text-sm md:text-base mb-6 max-w-md mx-auto">
-                  Send your documents and questions — we’ll guide you on the next step.
-                </p>
+            <h2 className="font-serif text-foreground text-2xl md:text-3xl leading-tight mb-3">
+              Still have questions?
+            </h2>
 
-                <FacebookCTA variant="default" />
+            <p className="text-muted-foreground text-sm md:text-base mb-5 max-w-md mx-auto">
+              Send your documents and questions — we’ll guide you on the next step.
+            </p>
 
-              </div>
-            </div>
-          </section>
+            <FacebookCTA variant="primary" />
 
+          </div>
         </div>
       </section>
     </>
