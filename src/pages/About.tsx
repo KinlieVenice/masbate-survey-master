@@ -205,7 +205,7 @@ const About = () => {
             {[
               { name: "Danilo Rañola", pic: danilo },
               { name: "Nelmar Maglente", pic: nelmar },
-              { name: "Christian Viterbo", pic: christian },
+              { name: "Christian Balag", pic: christian },
               { name: "Jhong Gadayan", pic: jhong },
               { name: "Julio Rañola", pic: julio },
             ].map((member, i) => (
