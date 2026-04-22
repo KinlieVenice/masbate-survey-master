@@ -148,7 +148,7 @@ const About = () => {
               {/* Top accent bar */}
               <div className="absolute top-0 left-0 h-px w-16 bg-primary/50" />
               <div className="flex flex-col sm:flex-row gap-6">
-                <div className="relative aspect-[4/5] w-[60%] sm:w-[250px] shrink-0 rounded-sm overflow-hidden bg-secondary shadow-elevated">
+                <div className="relative aspect-[4/5] w-[60%] max-w-[230px] shrink-0 rounded-sm overflow-hidden bg-secondary shadow-elevated">
                   <img
                     src={m.pic}
                     alt={m.name}
@@ -218,7 +218,7 @@ const About = () => {
                     src={member.pic}
                     alt={member.name}
                     loading="lazy"
-                    className="absolute inset-0 h-full w-full object-cover grayscale group-hover:grayscale-0 transition-all duration-500"
+                    className="absolute inset-0 h-full w-full object-cover lg:grayscale group-hover:grayscale-0 transition-all duration-500"
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-primary/60 via-transparent to-transparent" />
                   <div className="absolute bottom-3 left-3 text-[10px] uppercase tracking-[0.2em] text-primary-foreground/70">

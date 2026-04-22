@@ -275,8 +275,10 @@ const Index = () => {
               align: "start",
               loop: true,
             }}
-            className="w-full max-w-5xl mx-auto"
+            className="w-full max-w-5xl mx-auto grid md:grid-cols-[repeat(3,auto)] gap-4 items-center"
           >
+            <CarouselPrevious className="hidden md:flex border-border bg-card hover:bg-secondary" />
+            
             <CarouselContent className="-ml-4">
               {[
                 {
@@ -333,8 +335,8 @@ const Index = () => {
                 </CarouselItem>
               ))}
             </CarouselContent>
-            <CarouselPrevious className="hidden md:flex -left-12 border-border bg-card hover:bg-secondary" />
-            <CarouselNext className="hidden md:flex -right-12 border-border bg-card hover:bg-secondary" />
+            
+            <CarouselNext className="hidden md:flex border-border bg-card hover:bg-secondary" />
           </Carousel>
         </div>
       </section>
