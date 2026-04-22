@@ -14,6 +14,7 @@ import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import { REQUIREMENTS_CHECKLIST, computeStatus, upsertSale, type Sale, type SaleFile } from "@/lib/adminStore";
 import { cn } from "@/lib/utils";
+import { TimePicker } from "@/components/admin/TimePicker";
 
 const schema = z.object({
   clientName: z.string().trim().min(2, "Client name required").max(120),
@@ -211,8 +212,8 @@ export const SaleFormDialog = ({
 
             <div className="grid sm:grid-cols-2 gap-4">
               <div className="space-y-1.5">
-                <Label htmlFor="time">Surveying time</Label>
-                <Input id="time" type="time" value={time} onChange={(e) => setTime(e.target.value)} />
+                <Label>Surveying time</Label>
+                <TimePicker value={time} onChange={setTime} />
               </div>
               <div className="space-y-1.5">
                 <Label htmlFor="location">Location (Barangay / Municipality)</Label>
