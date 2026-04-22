@@ -19,7 +19,7 @@ const fileToDataUrl = (file: File): Promise<string> =>
     r.readAsDataURL(file);
   });
 
-const MAX_DIM = 1600;
+const MAX_DIM = 1280;
 const compressImage = (file: File): Promise<string> =>
   new Promise(async (resolve, reject) => {
     try {
@@ -37,7 +37,10 @@ const compressImage = (file: File): Promise<string> =>
         const ctx = c.getContext("2d");
         if (!ctx) return resolve(dataUrl);
         ctx.drawImage(img, 0, 0, width, height);
-        try { resolve(c.toDataURL("image/jpeg", 0.78)); } catch { resolve(dataUrl); }
+        try {
+          const reencoded = c.toDataURL("image/jpeg", 0.7);
+          resolve(reencoded.length < dataUrl.length ? reencoded : dataUrl);
+        } catch { resolve(dataUrl); }
       };
       img.onerror = () => resolve(dataUrl);
       img.src = dataUrl;

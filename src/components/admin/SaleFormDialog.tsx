@@ -14,6 +14,7 @@ import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import { REQUIREMENTS_CHECKLIST, computeStatus, upsertSale, type Sale, type SaleFile } from "@/lib/adminStore";
 import { cn } from "@/lib/utils";
+import { TimePicker } from "@/components/admin/TimePicker";
 
 const schema = z.object({
   clientName: z.string().trim().min(2, "Client name required").max(120),
@@ -30,9 +31,9 @@ const fileToDataUrl = (file: File): Promise<string> =>
   });
 
 // Downscale large images to keep localStorage usage manageable.
-// Non-images pass through unchanged.
-const MAX_DIM = 1600;
-const JPEG_QUALITY = 0.78;
+// Non-images pass through unchanged. Picks the smaller of original vs re-encoded.
+const MAX_DIM = 1280;
+const JPEG_QUALITY = 0.7;
 const compressImage = (file: File): Promise<string> =>
   new Promise(async (resolve, reject) => {
     try {
@@ -56,7 +57,9 @@ const compressImage = (file: File): Promise<string> =>
         if (!ctx) return resolve(dataUrl);
         ctx.drawImage(img, 0, 0, width, height);
         try {
-          resolve(canvas.toDataURL("image/jpeg", JPEG_QUALITY));
+          const reencoded = canvas.toDataURL("image/jpeg", JPEG_QUALITY);
+          // Prefer whichever is smaller — small originals shouldn't be inflated by re-encoding.
+          resolve(reencoded.length < dataUrl.length ? reencoded : dataUrl);
         } catch {
           resolve(dataUrl);
         }
@@ -211,8 +214,8 @@ export const SaleFormDialog = ({
 
             <div className="grid sm:grid-cols-2 gap-4">
               <div className="space-y-1.5">
-                <Label htmlFor="time">Surveying time</Label>
-                <Input id="time" type="time" value={time} onChange={(e) => setTime(e.target.value)} />
+                <Label>Surveying time</Label>
+                <TimePicker value={time} onChange={setTime} />
               </div>
               <div className="space-y-1.5">
                 <Label htmlFor="location">Location (Barangay / Municipality)</Label>

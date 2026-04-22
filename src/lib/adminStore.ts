@@ -64,12 +64,32 @@ const load = <T,>(key: string, fallback: T): T => {
     return fallback;
   }
 };
+const isQuotaError = (err: unknown) =>
+  err instanceof DOMException &&
+  (err.name === "QuotaExceededError" ||
+    err.name === "NS_ERROR_DOM_QUOTA_REACHED" ||
+    err.code === 22 ||
+    err.code === 1014);
+
 const save = (key: string, value: unknown) => {
   try {
     localStorage.setItem(key, JSON.stringify(value));
   } catch (err) {
-    if (err instanceof DOMException && (err.name === "QuotaExceededError" || err.code === 22)) {
-      throw new Error("Storage full — since this is a mock up, only 1-2 small images can be saved to limit storage use.");
+    if (isQuotaError(err)) {
+      // Try to free space by stripping seeded mock files from existing sales,
+      // then retry once before surfacing an error.
+      try {
+        const sales = JSON.parse(localStorage.getItem(SALES_KEY) || "[]") as Sale[];
+        const trimmed = sales.map((s) => ({ ...s, files: [] }));
+        localStorage.setItem(SALES_KEY, JSON.stringify(trimmed));
+        localStorage.setItem(key, JSON.stringify(value));
+        return;
+      } catch {
+        /* fall through */
+      }
+      throw new Error(
+        "Browser storage is full. This demo stores files in your browser only — please remove some existing file attachments and try again."
+      );
     }
     throw err;
   }
