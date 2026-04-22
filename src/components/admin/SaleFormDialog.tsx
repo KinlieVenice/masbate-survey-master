@@ -31,9 +31,9 @@ const fileToDataUrl = (file: File): Promise<string> =>
   });
 
 // Downscale large images to keep localStorage usage manageable.
-// Non-images pass through unchanged.
-const MAX_DIM = 1600;
-const JPEG_QUALITY = 0.78;
+// Non-images pass through unchanged. Picks the smaller of original vs re-encoded.
+const MAX_DIM = 1280;
+const JPEG_QUALITY = 0.7;
 const compressImage = (file: File): Promise<string> =>
   new Promise(async (resolve, reject) => {
     try {
@@ -57,7 +57,9 @@ const compressImage = (file: File): Promise<string> =>
         if (!ctx) return resolve(dataUrl);
         ctx.drawImage(img, 0, 0, width, height);
         try {
-          resolve(canvas.toDataURL("image/jpeg", JPEG_QUALITY));
+          const reencoded = canvas.toDataURL("image/jpeg", JPEG_QUALITY);
+          // Prefer whichever is smaller — small originals shouldn't be inflated by re-encoding.
+          resolve(reencoded.length < dataUrl.length ? reencoded : dataUrl);
         } catch {
           resolve(dataUrl);
         }
