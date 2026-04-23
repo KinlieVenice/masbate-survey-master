@@ -26,13 +26,15 @@ export const REQUIREMENTS_CHECKLIST = [
 
 export type Sale = {
   id: string;
+  clientId: string;
   clientName: string;
   location?: string;
-  surveyingDay: string; // ISO
+  surveyingDay: string;
   totalAmount: number;
-  paidAmount: number;
   status: SaleStatus;
-  checklist: boolean[]; // length === REQUIREMENTS_CHECKLIST.length
+  surveyType: SurveyType;
+  assignedTeamId?: string;
+  checklist: boolean[];
   files: SaleFile[];
   remarks?: string;
   createdAt: string;
@@ -106,58 +108,154 @@ export const computeStatus = (total: number, paid: number): SaleStatus => {
   return "Down Payment";
 };
 
+export const getSaleStatusFromInvoice = (saleId: string, amount: number): SaleStatus => {
+  const invoices = listInvoices().filter(inv => inv.saleId === saleId);
+  if (invoices.length === 0) return "Unpaid";
+  const latestInvoice = invoices[0];
+  const totalPaid = latestInvoice.payments.reduce((sum, p) => sum + p.amount, 0);
+  return computeStatus(amount, totalPaid);
+};
+
+export const getInvoiceForSale = (saleId: string): Invoice | null => {
+  return listInvoices().find(inv => inv.saleId === saleId) ?? null;
+};
+
 const uid = () => Math.random().toString(36).slice(2, 11);
 
 // Seed demo data once
 const seed = async () => {
-  if (load<Sale[]>(SALES_KEY, []).length === 0) {
-    const today = new Date();
-    // Lazy-load mock images so seeding doesn't block initial render
-    const [taxDecl, aerial, sketch, propPhoto] = await Promise.all([
-      import("@/assets/mock-tax-declaration.jpg").then((m) => m.default),
-      import("@/assets/mock-land-aerial.jpg").then((m) => m.default),
-      import("@/assets/mock-lot-sketch.jpg").then((m) => m.default),
-      import("@/assets/mock-property-photo.jpg").then((m) => m.default),
-    ]);
-    const mockFilesA: SaleFile[] = [
-      { id: uid(), name: "tax-declaration.jpg", type: "image/jpeg", dataUrl: taxDecl },
-      { id: uid(), name: "lot-aerial-view.jpg", type: "image/jpeg", dataUrl: aerial },
-    ];
-    const mockFilesB: SaleFile[] = [
-      { id: uid(), name: "lot-sketch.jpg", type: "image/jpeg", dataUrl: sketch },
-      { id: uid(), name: "property-photo.jpg", type: "image/jpeg", dataUrl: propPhoto },
-    ];
-    const demo: Sale[] = Array.from({ length: 6 }).map((_, i) => {
-      const d = new Date(today);
-      d.setDate(d.getDate() - i * 7 + 3);
-      const total = 15000 + i * 4500;
-      const paid = i % 3 === 0 ? total : i % 3 === 1 ? total / 2 : 0;
-      return {
-        id: uid(),
-        clientName: ["Juan Dela Cruz", "Maria Santos", "Pedro Reyes", "Ana Lim", "Jose Cruz", "Liza Tan"][i],
-        location: ["Brgy. Nursery, Masbate City", "Brgy. Bayombon, Mobo", "Brgy. Tugbo, Masbate City", "Brgy. Asid, Masbate City", "Brgy. Sawang, Aroroy", "Brgy. Igang, Mobo"][i],
-        surveyingDay: d.toISOString(),
-        totalAmount: total,
-        paidAmount: paid,
-        status: computeStatus(total, paid),
-        checklist: REQUIREMENTS_CHECKLIST.map((_, k) => k < 3 + (i % 4)),
-        files: i === 0 ? mockFilesA : i === 2 ? mockFilesB : [],
-        createdAt: new Date(today.getTime() - i * 86400000 * 4).toISOString(),
-      };
-    });
-    save(SALES_KEY, demo);
-  }
-  if (load<Expense[]>(EXPENSES_KEY, []).length === 0) {
-    const today = new Date();
-    const demo: Expense[] = [
-      { id: uid(), name: "Field crew wages", description: "2-day field work", category: "Labor", amount: 4500, date: new Date(today.getTime() - 86400000 * 2).toISOString() },
-      { id: uid(), name: "Office rent", description: "Monthly", category: "Overhead", amount: 8000, date: new Date(today.getTime() - 86400000 * 8).toISOString() },
-      { id: uid(), name: "Fuel", description: "Trip to barangay", category: "Transport", amount: 1200, date: new Date(today.getTime() - 86400000 * 5).toISOString() },
-      { id: uid(), name: "DENR filing fee", description: "Subdivision plan", category: "Government Fees", amount: 2500, date: new Date(today.getTime() - 86400000 * 14).toISOString() },
-      { id: uid(), name: "Plotter ink", description: "Plan printing", category: "Office", amount: 1800, date: new Date(today.getTime() - 86400000 * 20).toISOString() },
-    ];
-    save(EXPENSES_KEY, demo);
-  }
+  if (load<Client[]>(CLIENTS_KEY, []).length > 0) return;
+
+  const today = new Date();
+
+  // Lazy-load mock images so seeding doesn't block initial render
+  const [taxDecl, aerial, sketch, propPhoto] = await Promise.all([
+    import("@/assets/mock-tax-declaration.jpg").then((m) => m.default),
+    import("@/assets/mock-land-aerial.jpg").then((m) => m.default),
+    import("@/assets/mock-lot-sketch.jpg").then((m) => m.default),
+    import("@/assets/mock-property-photo.jpg").then((m) => m.default),
+  ]);
+
+  // Clients
+  const client1Id = uid();
+  const client2Id = uid();
+  const demoClients: Client[] = [
+    { id: client1Id, name: "Juan Dela Cruz", email: "juan.delacruz@email.com", phone: "0917 123 4567", address: "Brgy. Nursery, Masbate City", createdAt: new Date(today.getTime() - 86400000 * 30).toISOString() },
+    { id: client2Id, name: "Maria Santos", email: "maria.santos@email.com", phone: "0928 234 5678", address: "Brgy. Bayombon, Mobo, Masbate", createdAt: new Date(today.getTime() - 86400000 * 25).toISOString() },
+  ];
+  save(CLIENTS_KEY, demoClients);
+
+  // Teams
+  const team1Id = uid();
+  const team2Id = uid();
+  const demoTeams: Team[] = [
+    { id: team1Id, name: "Team Alpha", leaderId: uid(), members: [
+      { id: uid(), name: "Roberto Rañola", role: "Party Chief", phone: "0919 111 1111" },
+      { id: uid(), name: "Carlos Cruz", role: "Instrumentman" },
+      { id: uid(), name: "Miguel Torres", role: "Rodman" },
+    ], status: "Available", createdAt: new Date(today.getTime() - 86400000 * 60).toISOString() },
+    { id: team2Id, name: "Team Bravo", leaderId: uid(), members: [
+      { id: uid(), name: "Fernando Reyes", role: "Party Chief", phone: "0920 222 2222" },
+      { id: uid(), name: "Adrian Mercado", role: "Instrumentman" },
+      { id: uid(), name: "Rico Aquino", role: "Helper" },
+    ], status: "Deployed", createdAt: new Date(today.getTime() - 86400000 * 45).toISOString() },
+  ];
+  save(TEAMS_KEY, demoTeams);
+
+  // Equipment
+  const demoEquipment: Equipment[] = [
+    { id: uid(), name: "Trimble GPS R12", type: "GPS", serialNumber: "TRM-R12-2023-001", condition: "Good", assignedTeamId: team1Id, lastCalibration: new Date(today.getTime() - 86400000 * 30).toISOString(), maintenanceLogs: [], createdAt: new Date(today.getTime() - 86400000 * 120).toISOString() },
+    { id: uid(), name: "Leica TS16 Total Station", type: "Total Station", serialNumber: "LCA-TS16-2022-005", condition: "Good", assignedTeamId: team2Id, lastCalibration: new Date(today.getTime() - 86400000 * 15).toISOString(), maintenanceLogs: [], createdAt: new Date(today.getTime() - 86400000 * 100).toISOString() },
+  ];
+  save(EQUIPMENT_KEY, demoEquipment);
+
+  // Sales with invoices
+  const sale1Id = uid();
+  const sale2Id = uid();
+  const mockFiles1: SaleFile[] = [
+    { id: uid(), name: "tax-declaration.jpg", type: "image/jpeg", dataUrl: taxDecl },
+    { id: uid(), name: "lot-aerial-view.jpg", type: "image/jpeg", dataUrl: aerial },
+  ];
+  const mockFiles2: SaleFile[] = [
+    { id: uid(), name: "lot-sketch.jpg", type: "image/jpeg", dataUrl: sketch },
+    { id: uid(), name: "property-photo.jpg", type: "image/jpeg", dataUrl: propPhoto },
+  ];
+
+  const demoSales: Sale[] = [
+    {
+      id: sale1Id,
+      clientId: client1Id,
+      clientName: "Juan Dela Cruz",
+      location: "Brgy. Nursery, Masbate City",
+      surveyingDay: new Date(today.getTime() - 86400000 * 5).toISOString(),
+      totalAmount: 25000,
+      status: "Partial",
+      surveyType: "Relocation Survey",
+      assignedTeamId: team1Id,
+      checklist: [true, true, true, true],
+      files: mockFiles1,
+      createdAt: new Date(today.getTime() - 86400000 * 10).toISOString(),
+    },
+    {
+      id: sale2Id,
+      clientId: client2Id,
+      clientName: "Maria Santos",
+      location: "Brgy. Bayombon, Mobo, Masbate",
+      surveyingDay: new Date(today.getTime() - 86400000 * 12).toISOString(),
+      totalAmount: 35000,
+      status: "Paid",
+      surveyType: "Subdivision",
+      assignedTeamId: team2Id,
+      checklist: [true, true, true, true, true],
+      files: mockFiles2,
+      createdAt: new Date(today.getTime() - 86400000 * 18).toISOString(),
+    },
+  ];
+  save(SALES_KEY, demoSales);
+
+  // Invoices for each sale
+  const inv1Payment1Id = uid();
+  const inv2Payment1Id = uid();
+  const inv2Payment2Id = uid();
+  const demoInvoices: Invoice[] = [
+    {
+      id: uid(),
+      invoiceNumber: "INV-2026-001",
+      clientId: client1Id,
+      saleId: sale1Id,
+      amount: 25000,
+      dueDate: new Date(today.getTime() + 86400000 * 15).toISOString(),
+      payments: [
+        { id: inv1Payment1Id, date: new Date(today.getTime() - 86400000 * 2).toISOString(), amount: 10000, method: "Cash", reference: undefined, notes: "Down payment" },
+      ],
+      status: "Partial",
+      createdAt: new Date(today.getTime() - 86400000 * 10).toISOString(),
+    },
+    {
+      id: uid(),
+      invoiceNumber: "INV-2026-002",
+      clientId: client2Id,
+      saleId: sale2Id,
+      amount: 35000,
+      dueDate: new Date(today.getTime() + 86400000 * 7).toISOString(),
+      payments: [
+        { id: inv2Payment1Id, date: new Date(today.getTime() - 86400000 * 8).toISOString(), amount: 20000, method: "Bank Transfer", reference: "BT-2026-0401" },
+        { id: inv2Payment2Id, date: new Date(today.getTime() - 86400000 * 1).toISOString(), amount: 15000, method: "GCash", reference: "GC-2026-0415" },
+      ],
+      status: "Paid",
+      createdAt: new Date(today.getTime() - 86400000 * 18).toISOString(),
+    },
+  ];
+  save(INVOICES_KEY, demoInvoices);
+
+  // Expenses - ensure profit is higher than total expense
+  // Sale 1: Paid 10000, Sale 2: Paid 35000 = Total Revenue 45000
+  // Let's keep expenses under 15000 so profit is positive
+  const demoExpenses: Expense[] = [
+    { id: uid(), name: "Field crew wages", description: "2-day field work for subdivision survey", category: "Labor", amount: 6000, date: new Date(today.getTime() - 86400000 * 2).toISOString() },
+    { id: uid(), name: "Fuel and transport", description: "Trip to Masbate City and back", category: "Transport", amount: 3500, date: new Date(today.getTime() - 86400000 * 3).toISOString() },
+  ];
+  save(EXPENSES_KEY, demoExpenses);
 };
 seed();
 
@@ -169,7 +267,7 @@ export const getSale = (id: string) => listSales().find((s) => s.id === id);
 
 export const upsertSale = (sale: Omit<Sale, "id" | "status" | "createdAt"> & { id?: string }) => {
   const all = load<Sale[]>(SALES_KEY, []);
-  const status = computeStatus(sale.totalAmount, sale.paidAmount);
+  const status = getSaleStatusFromInvoice(sale.id ?? "", sale.totalAmount);
   if (sale.id) {
     const idx = all.findIndex((s) => s.id === sale.id);
     if (idx >= 0) {
@@ -183,6 +281,7 @@ export const upsertSale = (sale: Omit<Sale, "id" | "status" | "createdAt"> & { i
 
 export const deleteSale = (id: string) => {
   save(SALES_KEY, load<Sale[]>(SALES_KEY, []).filter((s) => s.id !== id));
+  save(INVOICES_KEY, load<Invoice[]>(INVOICES_KEY, []).filter((inv) => inv.saleId !== id));
 };
 
 // Expenses
@@ -385,16 +484,13 @@ export type Payment = {
   notes?: string;
 };
 
-export type InvoiceScope = "client" | "project";
-
 export type InvoiceStatus = "Unpaid" | "Partial" | "Paid" | "Overdue";
 
 export type Invoice = {
   id: string;
   invoiceNumber: string;
-  scope: InvoiceScope;
   clientId: string;
-  projectId?: string;
+  saleId: string;
   amount: number;
   dueDate?: string;
   payments: Payment[];

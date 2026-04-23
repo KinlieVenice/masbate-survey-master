@@ -1,13 +1,19 @@
 import { useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
-import { ArrowLeft, ChevronLeft, ChevronRight, Download, FileText, MapPin, Pencil, Upload, Trash2 } from "lucide-react";
+import { ArrowLeft, ChevronLeft, ChevronRight, Download, FileText, MapPin, Pencil, Upload, Trash2, Plus, CalendarIcon } from "lucide-react";
 import { format } from "date-fns";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { getSale, upsertSale, type SaleFile } from "@/lib/adminStore";
+import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Calendar } from "@/components/ui/calendar";
+import { getSale, upsertSale, listTeams, getInvoiceForSale, upsertInvoice, computeInvoiceStatus, type SaleFile, type Payment, type PaymentMethod, type Invoice } from "@/lib/adminStore";
 import { SaleFormDialog } from "@/components/admin/SaleFormDialog";
 import { toast } from "sonner";
+import { cn } from "@/lib/utils";
 
 const peso = (n: number) => `₱${n.toLocaleString("en-PH", { minimumFractionDigits: 2 })}`;
 
@@ -47,6 +53,98 @@ const compressImage = (file: File): Promise<string> =>
     } catch (e) { reject(e); }
   });
 
+const paymentMethods: PaymentMethod[] = ["Cash", "Bank Transfer", "GCash", "Check", "Other"];
+
+const statusVariant = (s: string) =>
+  s === "Paid" ? "bg-primary/15 text-primary border-primary/20" :
+  s === "Partial" || s === "Down Payment" ? "bg-accent/20 text-accent-foreground border-accent/30" :
+  s === "Overdue" ? "bg-destructive/15 text-destructive border-destructive/20" :
+  "bg-muted text-muted-foreground border-border";
+
+const PaymentFormDialog = ({
+  open,
+  onOpenChange,
+  payment,
+  onSaved,
+}: {
+  open: boolean;
+  onOpenChange: (v: boolean) => void;
+  payment: Payment | null;
+  onSaved: (p: Payment) => void;
+}) => {
+  const [amount, setAmount] = useState(String(payment?.amount ?? ""));
+  const [method, setMethod] = useState<PaymentMethod>(payment?.method ?? "Cash");
+  const [reference, setReference] = useState(payment?.reference ?? "");
+  const [notes, setNotes] = useState(payment?.notes ?? "");
+  const [date, setDate] = useState<Date>(payment ? new Date(payment.date) : new Date());
+
+  const submit = () => {
+    const amt = Number(amount);
+    if (!amt || amt <= 0) { toast.error("Valid amount is required"); return; }
+    onSaved({
+      id: payment?.id ?? Math.random().toString(36).slice(2, 10),
+      date: date.toISOString(),
+      amount: amt,
+      method,
+      reference: reference.trim() || undefined,
+      notes: notes.trim() || undefined,
+    });
+    onOpenChange(false);
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent>
+        <DialogHeader><DialogTitle className="font-serif text-xl">{payment ? "Edit payment" : "Record payment"}</DialogTitle></DialogHeader>
+        <div className="space-y-4 py-4">
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-1.5">
+              <Label>Date</Label>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button variant="outline" className="w-full justify-start gap-2 font-normal">
+                    <CalendarIcon className="h-4 w-4" />
+                    {format(date, "PPP")}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0" align="start">
+                  <Calendar mode="single" selected={date} onSelect={(d) => d && setDate(d)} initialFocus className={cn("p-3 pointer-events-auto")} />
+                </PopoverContent>
+              </Popover>
+            </div>
+            <div className="space-y-1.5">
+              <Label htmlFor="pamt">Amount (₱) *</Label>
+              <Input id="pamt" type="number" min={0.01} step="0.01" value={amount} onChange={(e) => setAmount(e.target.value)} placeholder="0.00" />
+            </div>
+          </div>
+          <div className="space-y-1.5">
+            <Label>Payment method</Label>
+            <select
+              className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+              value={method}
+              onChange={(e) => setMethod(e.target.value as PaymentMethod)}
+            >
+              {paymentMethods.map((m) => <option key={m} value={m}>{m}</option>)}
+            </select>
+          </div>
+          <div className="space-y-1.5">
+            <Label htmlFor="pref">Reference / Transaction #</Label>
+            <Input id="pref" value={reference} onChange={(e) => setReference(e.target.value)} placeholder="Optional" />
+          </div>
+          <div className="space-y-1.5">
+            <Label htmlFor="pnotes">Notes</Label>
+            <Input id="pnotes" value={notes} onChange={(e) => setNotes(e.target.value)} placeholder="Optional" maxLength={200} />
+          </div>
+        </div>
+        <DialogFooter>
+          <Button variant="outline" onClick={() => onOpenChange(false)}>Cancel</Button>
+          <Button onClick={submit}>{payment ? "Save" : "Record payment"}</Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+};
+
 const AdminSaleDetail = () => {
   const { id } = useParams();
   const nav = useNavigate();
@@ -55,6 +153,8 @@ const AdminSaleDetail = () => {
   const [idx, setIdx] = useState(0);
   const [editOpen, setEditOpen] = useState(false);
   const [busy, setBusy] = useState(false);
+  const [paymentDialogOpen, setPaymentDialogOpen] = useState(false);
+  const [editingPayment, setEditingPayment] = useState<{ payment: Payment | null; index: number } | null>(null);
 
   if (!sale) {
     return (
@@ -64,6 +164,10 @@ const AdminSaleDetail = () => {
       </div>
     );
   }
+
+  const invoice = getInvoiceForSale(sale.id);
+  const teams = listTeams();
+  const team = sale.assignedTeamId ? teams.find(t => t.id === sale.assignedTeamId) : null;
 
   const file = sale.files[idx];
   const isImage = file?.type.startsWith("image/");
@@ -98,11 +202,13 @@ const AdminSaleDetail = () => {
       }
       upsertSale({
         id: sale.id,
+        clientId: sale.clientId,
         clientName: sale.clientName,
         location: sale.location,
         surveyingDay: sale.surveyingDay,
         totalAmount: sale.totalAmount,
-        paidAmount: sale.paidAmount,
+        surveyType: sale.surveyType,
+        assignedTeamId: sale.assignedTeamId,
         checklist: sale.checklist,
         files: [...sale.files, ...next],
         remarks: sale.remarks,
@@ -119,11 +225,13 @@ const AdminSaleDetail = () => {
   const handleDeleteFile = (fileId: string) => {
     upsertSale({
       id: sale.id,
+      clientId: sale.clientId,
       clientName: sale.clientName,
       location: sale.location,
       surveyingDay: sale.surveyingDay,
       totalAmount: sale.totalAmount,
-      paidAmount: sale.paidAmount,
+      surveyType: sale.surveyType,
+      assignedTeamId: sale.assignedTeamId,
       checklist: sale.checklist,
       files: sale.files.filter((f) => f.id !== fileId),
       remarks: sale.remarks,
@@ -131,6 +239,38 @@ const AdminSaleDetail = () => {
     setIdx(0);
     setVersion((v) => v + 1);
     toast.success("File removed");
+  };
+
+  const handleSavePayment = (payment: Payment) => {
+    let inv = invoice;
+    if (!inv) {
+      const newInvoice = {
+        saleId: sale.id,
+        clientId: sale.clientId,
+        amount: sale.totalAmount,
+        dueDate: sale.surveyingDay,
+        payments: [] as Payment[],
+        notes: undefined as string | undefined,
+      };
+      upsertInvoice(newInvoice);
+      inv = getInvoiceForSale(sale.id);
+      if (!inv) {
+        toast.error("Failed to create invoice");
+        return;
+      }
+    }
+    const updatedPayments = editingPayment !== null && editingPayment.index >= 0
+      ? inv.payments.map((p, i) => i === editingPayment.index ? payment : p)
+      : [...inv.payments, payment];
+    const updatedInvoice: Invoice = {
+      ...inv,
+      payments: updatedPayments,
+      status: computeInvoiceStatus(inv.amount, updatedPayments),
+    };
+    upsertInvoice(updatedInvoice);
+    toast.success(editingPayment ? "Payment updated" : "Payment recorded");
+    setVersion((v) => v + 1);
+    setEditingPayment(null);
   };
 
   return (
@@ -150,11 +290,7 @@ const AdminSaleDetail = () => {
           </p>
         </div>
         <div className="flex items-center gap-3">
-          <Badge variant="outline" className={
-            sale.status === "Paid" ? "bg-primary/15 text-primary border-primary/20" :
-            sale.status === "Down Payment" ? "bg-accent/20 text-accent-foreground border-accent/30" :
-            "bg-muted text-muted-foreground border-border"
-          }>{sale.status}</Badge>
+          <Badge variant="outline" className={statusVariant(sale.status)}>{sale.status}</Badge>
           <Button onClick={() => setEditOpen(true)} className="gap-2">
             <Pencil className="h-4 w-4" /> Edit sale
           </Button>
@@ -254,11 +390,11 @@ const AdminSaleDetail = () => {
 
         <div className="space-y-6">
           <Card className="p-6">
-            <h3 className="font-serif text-lg mb-4">Payment</h3>
+            <h3 className="font-serif text-lg mb-4">Details</h3>
             <div className="space-y-3 text-sm">
               <Row label="Total amount" value={peso(sale.totalAmount)} />
-              <Row label="Paid amount" value={peso(sale.paidAmount)} />
-              <Row label="Balance" value={peso(Math.max(0, sale.totalAmount - sale.paidAmount))} />
+              <Row label="Survey type" value={sale.surveyType} />
+              <Row label="Assigned team" value={team?.name ?? "—"} />
             </div>
           </Card>
 
@@ -288,7 +424,80 @@ const AdminSaleDetail = () => {
         </div>
       </div>
 
+      <Card className="p-6">
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="font-serif text-xl">Invoice</h2>
+          {!invoice && (
+            <Button variant="outline" size="sm" onClick={() => setPaymentDialogOpen(true)}>
+              <Plus className="h-4 w-4 mr-1" /> Create Invoice
+            </Button>
+          )}
+        </div>
+        {invoice ? (
+          <div className="space-y-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <FileText className="h-5 w-5 text-primary" />
+                <span className="font-medium text-foreground">{invoice.invoiceNumber}</span>
+                <Badge variant="outline" className={statusVariant(invoice.status)}>{invoice.status}</Badge>
+              </div>
+              <div className="flex gap-2">
+                <Button variant="outline" size="sm" onClick={() => { setEditingPayment({ payment: null, index: -1 }); setPaymentDialogOpen(true); }}>
+                  <Plus className="h-4 w-4 mr-1" /> Add Payment
+                </Button>
+              </div>
+            </div>
+            <div className="grid sm:grid-cols-3 gap-4 text-sm">
+              <div>
+                <div className="text-xs text-muted-foreground mb-1">Amount</div>
+                <div className="font-medium text-foreground">{peso(invoice.amount)}</div>
+              </div>
+              <div>
+                <div className="text-xs text-muted-foreground mb-1">Due Date</div>
+                <div className="font-medium text-foreground">{invoice.dueDate ? format(new Date(invoice.dueDate), "MMM d, yyyy") : "—"}</div>
+              </div>
+              <div>
+                <div className="text-xs text-muted-foreground mb-1">Total Paid</div>
+                <div className="font-medium text-primary">{peso(invoice.payments.reduce((s, p) => s + p.amount, 0))}</div>
+              </div>
+            </div>
+            <div>
+              <div className="text-xs text-muted-foreground mb-2 uppercase tracking-wider">Payments Received</div>
+              {invoice.payments.length === 0 ? (
+                <p className="text-sm text-muted-foreground py-4 text-center border border-dashed border-border rounded-sm">No payments recorded yet.</p>
+              ) : (
+                <div className="space-y-2">
+                  {invoice.payments.map((p, i) => (
+                    <div key={p.id} className="flex items-center justify-between gap-3 px-3 py-2 rounded-sm bg-muted/40 border border-border text-sm">
+                      <div>
+                        <div className="text-xs text-muted-foreground">{format(new Date(p.date), "MMM d, yyyy")}</div>
+                        <div className="font-medium text-foreground">{peso(p.amount)}</div>
+                        <div className="text-xs text-muted-foreground">{p.method}{p.reference ? ` · ${p.reference}` : ""}</div>
+                      </div>
+                      <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => { setEditingPayment({ payment: p, index: i }); setPaymentDialogOpen(true); }}>
+                        <Pencil className="h-3 w-3" />
+                      </Button>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+        ) : (
+          <p className="text-sm text-muted-foreground py-4 text-center border border-dashed border-border rounded-sm">
+            No invoice created yet. Create an invoice to track payments.
+          </p>
+        )}
+      </Card>
+
       <SaleFormDialog open={editOpen} onOpenChange={setEditOpen} sale={sale} onSaved={() => setVersion((v) => v + 1)} />
+
+      <PaymentFormDialog
+        open={paymentDialogOpen}
+        onOpenChange={setPaymentDialogOpen}
+        payment={editingPayment?.payment ?? null}
+        onSaved={handleSavePayment}
+      />
     </div>
   );
 };

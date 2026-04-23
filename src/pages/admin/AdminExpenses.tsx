@@ -1,7 +1,7 @@
-import { useState } from "react";
-import { format } from "date-fns";
+import { useState, useMemo } from "react";
+import { format, startOfDay, endOfDay, startOfMonth, endOfMonth, subDays, subMonths, isWithinInterval, startOfYear, endOfYear } from "date-fns";
 import { z } from "zod";
-import { Plus, Pencil, Trash2 } from "lucide-react";
+import { Plus, Pencil, Trash2, Search, CalendarIcon, ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -11,8 +11,13 @@ import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Calendar } from "@/components/ui/calendar";
 import { toast } from "sonner";
 import { listExpenses, upsertExpense, deleteExpense, EXPENSE_CATEGORIES, type Expense } from "@/lib/adminStore";
+import { cn } from "@/lib/utils";
+import type { DateRange } from "react-day-picker";
+import { useEffect } from "react";
 
 const schema = z.object({
   name: z.string().trim().min(2, "Name required").max(120),
@@ -23,26 +28,137 @@ const schema = z.object({
 
 const peso = (n: number) => `₱${n.toLocaleString("en-PH", { minimumFractionDigits: 2 })}`;
 
+type Preset = { label: string; getRange: () => { from: Date; to: Date } };
+
+const PRESETS: Preset[] = [
+  { label: "Today", getRange: () => ({ from: startOfDay(new Date()), to: endOfDay(new Date()) }) },
+  { label: "Last 7 days", getRange: () => ({ from: startOfDay(subDays(new Date(), 6)), to: endOfDay(new Date()) }) },
+  { label: "Last 30 days", getRange: () => ({ from: startOfDay(subDays(new Date(), 29)), to: endOfDay(new Date()) }) },
+  { label: "This month", getRange: () => ({ from: startOfMonth(new Date()), to: endOfMonth(new Date()) }) },
+  { label: "Last month", getRange: () => { const d = subMonths(new Date(), 1); return { from: startOfMonth(d), to: endOfMonth(d) }; } },
+  { label: "This year", getRange: () => ({ from: startOfYear(new Date()), to: endOfYear(new Date()) }) },
+  { label: "Last year", getRange: () => { const d = subMonths(new Date(), 12); return { from: startOfYear(d), to: endOfYear(d) }; } },
+];
+
 const AdminExpenses = () => {
   const [version, setVersion] = useState(0);
   const [open, setOpen] = useState(false);
   const [editing, setEditing] = useState<Expense | null>(null);
-
-  const expenses = listExpenses();
-  const total = expenses.reduce((a, e) => a + e.amount, 0);
+  const [search, setSearch] = useState("");
+  const [page, setPage] = useState(1);
+  const [pageSize] = useState(10);
+  const [range, setRange] = useState<DateRange>({
+    from: startOfMonth(new Date()),
+    to: endOfMonth(new Date()),
+  });
 
   const refresh = () => setVersion((v) => v + 1);
+
+  const expenses = listExpenses();
+  const interval = useMemo(() => ({
+    start: startOfDay(range.from ?? new Date()),
+    end: endOfDay(range.to ?? range.from ?? new Date()),
+  }), [range]);
+
+  const filteredExpenses = useMemo(() => {
+    return expenses.filter((e) => {
+      const matchSearch = search === "" ||
+        e.name.toLowerCase().includes(search.toLowerCase()) ||
+        e.category.toLowerCase().includes(search.toLowerCase()) ||
+        e.description.toLowerCase().includes(search.toLowerCase());
+      const matchDate = isWithinInterval(new Date(e.date), interval);
+      return matchSearch && matchDate;
+    });
+  }, [expenses, search, interval]);
+
+  const totalFiltered = filteredExpenses.reduce((a, e) => a + e.amount, 0);
+  const totalPages = Math.max(1, Math.ceil(filteredExpenses.length / pageSize));
+  const paginatedExpenses = filteredExpenses.slice((page - 1) * pageSize, page * pageSize);
+
+  const activePresetLabel = useMemo(() => {
+    if (!range.from || !range.to) return null;
+    for (const p of PRESETS) {
+      const r = p.getRange();
+      if (
+        startOfDay(r.from).getTime() === startOfDay(range.from).getTime() &&
+        endOfDay(r.to).getTime() === endOfDay(range.to).getTime()
+      ) return p.label;
+    }
+    return null;
+  }, [range]);
+
+  const rangeLabel = range.from
+    ? range.to && startOfDay(range.to).getTime() !== startOfDay(range.from).getTime()
+      ? `${format(range.from, "MMM d, yyyy")} – ${format(range.to, "MMM d, yyyy")}`
+      : format(range.from, "MMM d, yyyy")
+    : "Pick a range";
 
   return (
     <div className="space-y-6">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <h1 className="font-serif text-3xl text-foreground">Expenses</h1>
-          <p className="text-sm text-muted-foreground mt-1">Total tracked: <span className="font-medium text-foreground">{peso(total)}</span></p>
+          <p className="text-sm text-muted-foreground mt-1">Total tracked: <span className="font-medium text-foreground">{peso(totalFiltered)}</span></p>
         </div>
         <Button onClick={() => { setEditing(null); setOpen(true); }} className="gap-2">
           <Plus className="h-4 w-4" /> New expense
         </Button>
+      </div>
+
+      <div className="flex flex-col sm:flex-row gap-3">
+        <div className="relative flex-1 max-w-sm">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <Input
+            placeholder="Search name, category, description…"
+            value={search}
+            onChange={(e) => { setSearch(e.target.value); setPage(1); }}
+            className="pl-9"
+          />
+        </div>
+        <Popover>
+          <PopoverTrigger asChild>
+            <Button variant="outline" className="gap-3 justify-start min-w-[260px] h-10 px-4">
+              <CalendarIcon className="h-4 w-4 text-primary shrink-0" />
+              <div className="flex flex-col items-start leading-tight">
+                <span className="text-[10px] uppercase tracking-wider text-muted-foreground">{activePresetLabel ?? "Custom range"}</span>
+                <span className="text-sm font-medium truncate">{rangeLabel}</span>
+              </div>
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent className="w-auto p-0 max-w-[calc(100vw-2rem)]" align="end">
+            <div className="flex flex-col sm:flex-row">
+              <div className="border-b sm:border-b-0 sm:border-r border-border p-2 flex sm:flex-col gap-1 overflow-x-auto sm:overflow-visible sm:min-w-[150px] bg-muted/30">
+                <div className="hidden sm:block text-[10px] uppercase tracking-wider text-muted-foreground px-3 pt-2 pb-1">Quick select</div>
+                {PRESETS.map((p) => {
+                  const isActive = activePresetLabel === p.label;
+                  return (
+                    <button
+                      key={p.label}
+                      onClick={() => setRange(p.getRange())}
+                      className={cn(
+                        "text-left text-sm px-3 py-1.5 rounded-sm whitespace-nowrap transition-colors",
+                        isActive
+                          ? "bg-primary text-primary-foreground"
+                          : "text-foreground/80 hover:bg-secondary hover:text-foreground"
+                      )}
+                    >
+                      {p.label}
+                    </button>
+                  );
+                })}
+              </div>
+              <Calendar
+                mode="range"
+                selected={range}
+                onSelect={(r) => r && setRange(r)}
+                numberOfMonths={1}
+                defaultMonth={range.from}
+                initialFocus
+                className={cn("p-3 pointer-events-auto")}
+              />
+            </div>
+          </PopoverContent>
+        </Popover>
       </div>
 
       <Card className="p-4" key={version}>
@@ -59,7 +175,7 @@ const AdminExpenses = () => {
               </tr>
             </thead>
             <tbody>
-              {expenses.map((e) => (
+              {paginatedExpenses.map((e) => (
                 <tr key={e.id} className="border-b border-border/60 hover:bg-secondary/40">
                   <td className="py-3 px-2 text-muted-foreground">{format(new Date(e.date), "MMM d, yyyy")}</td>
                   <td className="py-3 px-2 font-medium text-foreground">{e.name}</td>
@@ -76,15 +192,15 @@ const AdminExpenses = () => {
                   </td>
                 </tr>
               ))}
-              {expenses.length === 0 && (
-                <tr><td colSpan={6} className="py-12 text-center text-muted-foreground">No expenses yet.</td></tr>
+              {paginatedExpenses.length === 0 && (
+                <tr><td colSpan={6} className="py-12 text-center text-muted-foreground">No expenses found.</td></tr>
               )}
             </tbody>
           </table>
         </div>
 
         <div className="md:hidden space-y-3">
-          {expenses.map((e) => (
+          {paginatedExpenses.map((e) => (
             <div key={e.id} className="border border-border rounded-sm p-4">
               <div className="flex items-start justify-between gap-3 mb-2">
                 <div>
@@ -105,8 +221,20 @@ const AdminExpenses = () => {
               </div>
             </div>
           ))}
-          {expenses.length === 0 && <p className="py-12 text-center text-muted-foreground">No expenses yet.</p>}
+          {paginatedExpenses.length === 0 && <p className="py-12 text-center text-muted-foreground">No expenses found.</p>}
         </div>
+
+        {totalPages > 1 && (
+          <div className="flex items-center justify-center gap-4 mt-4 pt-4 border-t border-border">
+            <Button variant="outline" size="icon" onClick={() => setPage((p) => Math.max(1, p - 1))} disabled={page === 1}>
+              <ChevronLeft className="h-4 w-4" />
+            </Button>
+            <span className="text-sm text-muted-foreground">Page {page} of {totalPages}</span>
+            <Button variant="outline" size="icon" onClick={() => setPage((p) => Math.min(totalPages, p + 1))} disabled={page === totalPages}>
+              <ChevronRight className="h-4 w-4" />
+            </Button>
+          </div>
+        )}
       </Card>
 
       <ExpenseFormDialog open={open} onOpenChange={setOpen} expense={editing} onSaved={refresh} />
@@ -141,17 +269,15 @@ const ExpenseFormDialog = ({ open, onOpenChange, expense, onSaved }: { open: boo
   const [amount, setAmount] = useState(String(expense?.amount ?? 0));
   const [date, setDate] = useState(expense?.date ?? new Date().toISOString());
 
-  // Reset on open
-  useState(() => {
-    setName(expense?.name ?? "");
-    setDescription(expense?.description ?? "");
-    setCategory(expense?.category ?? EXPENSE_CATEGORIES[0]);
-    setAmount(String(expense?.amount ?? 0));
-    setDate(expense?.date ?? new Date().toISOString());
-  });
-
-  // Re-init when dialog opens with new expense
-  useReinit(open, expense, { setName, setDescription, setCategory, setAmount, setDate });
+  useEffect(() => {
+    if (open) {
+      setName(expense?.name ?? "");
+      setDescription(expense?.description ?? "");
+      setCategory(expense?.category ?? EXPENSE_CATEGORIES[0]);
+      setAmount(String(expense?.amount ?? 0));
+      setDate(expense?.date ?? new Date().toISOString());
+    }
+  }, [open, expense]);
 
   const submit = () => {
     try {
@@ -205,19 +331,5 @@ const ExpenseFormDialog = ({ open, onOpenChange, expense, onSaved }: { open: boo
     </Dialog>
   );
 };
-
-import { useEffect } from "react";
-function useReinit(open: boolean, expense: Expense | null, setters: { setName: (s: string) => void; setDescription: (s: string) => void; setCategory: (s: string) => void; setAmount: (s: string) => void; setDate: (s: string) => void }) {
-  useEffect(() => {
-    if (open) {
-      setters.setName(expense?.name ?? "");
-      setters.setDescription(expense?.description ?? "");
-      setters.setCategory(expense?.category ?? EXPENSE_CATEGORIES[0]);
-      setters.setAmount(String(expense?.amount ?? 0));
-      setters.setDate(expense?.date ?? new Date().toISOString());
-    }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [open, expense]);
-}
 
 export default AdminExpenses;

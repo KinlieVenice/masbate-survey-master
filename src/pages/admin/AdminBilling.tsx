@@ -1,6 +1,9 @@
-import { useState } from "react";
-import { Plus, Search, Pencil, Trash2, FileText, Receipt, X, PlusCircle } from "lucide-react";
-import { format } from "date-fns";
+import { useState, useMemo } from "react";
+import { Link } from "react-router-dom";
+import { Search, Pencil, Trash2, FileText, X, PlusCircle, CalendarIcon, ChevronLeft, ChevronRight, Download } from "lucide-react";
+import { format, startOfDay, endOfDay, startOfMonth, endOfMonth, endOfYear, isWithinInterval, subDays, subMonths, startOfYear } from "date-fns";
+import jsPDF from "jspdf";
+import autoTable from "jspdf-autotable";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -12,9 +15,10 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Calendar } from "@/components/ui/calendar";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
-import { listInvoices, listClients, listProjects, upsertInvoice, deleteInvoice, computeInvoiceStatus, type Invoice, type InvoiceStatus, type InvoiceScope, type Payment, type PaymentMethod } from "@/lib/adminStore";
+import { listInvoices, listClients, listSales, upsertInvoice, deleteInvoice, computeInvoiceStatus, upsertSale, getSale, type Invoice, type InvoiceStatus, type Payment, type PaymentMethod } from "@/lib/adminStore";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
+import type { DateRange } from "react-day-picker";
 
 const PAGE_SIZE = 10;
 const peso = (n: number) => `₱${n.toLocaleString("en-PH", { minimumFractionDigits: 2 })}`;
@@ -26,6 +30,17 @@ const statusVariant = (s: InvoiceStatus) =>
   "bg-muted text-muted-foreground border-border";
 
 const paymentMethods: PaymentMethod[] = ["Cash", "Bank Transfer", "GCash", "Check", "Other"];
+
+type Preset = { label: string; getRange: () => { from: Date; to: Date } };
+
+const PRESETS: Preset[] = [
+  { label: "Today", getRange: () => ({ from: startOfDay(new Date()), to: endOfDay(new Date()) }) },
+  { label: "Last 7 days", getRange: () => ({ from: startOfDay(subDays(new Date(), 6)), to: endOfDay(new Date()) }) },
+  { label: "Last 30 days", getRange: () => ({ from: startOfDay(subDays(new Date(), 29)), to: endOfDay(new Date()) }) },
+  { label: "This month", getRange: () => ({ from: startOfMonth(new Date()), to: endOfMonth(new Date()) }) },
+  { label: "Last month", getRange: () => { const d = subMonths(new Date(), 1); return { from: startOfMonth(d), to: endOfMonth(d) }; } },
+  { label: "This year", getRange: () => ({ from: startOfMonth(new Date()), to: endOfYear(new Date()) }) },
+];
 
 const PaymentFormDialog = ({
   open,
@@ -120,43 +135,51 @@ const InvoiceFormDialog = ({
   onSaved: () => void;
 }) => {
   const clients = listClients();
-  const projects = listProjects();
+  const sales = listSales();
 
-  const [scope, setScope] = useState<InvoiceScope>(invoice?.scope ?? "client");
-  const [clientId, setClientId] = useState(invoice?.clientId ?? "");
-  const [projectId, setProjectId] = useState(invoice?.projectId ?? "");
   const [amount, setAmount] = useState(String(invoice?.amount ?? "0"));
   const [dueDate, setDueDate] = useState<Date | null>(invoice?.dueDate ? new Date(invoice.dueDate) : null);
   const [notes, setNotes] = useState(invoice?.notes ?? "");
   const [payments, setPayments] = useState<Payment[]>(invoice?.payments ?? []);
   const [paymentDialogOpen, setPaymentDialogOpen] = useState(false);
   const [editingPayment, setEditingPayment] = useState<{ payment: Payment | null; index: number } | null>(null);
+  const [amountWarning, setAmountWarning] = useState(false);
 
-  const selectedProject = projectId ? projects.find((p) => p.id === projectId) : null;
+  const selectedSale = invoice?.saleId ? sales.find((s) => s.id === invoice.saleId) : null;
+  const client = invoice?.clientId ? clients.find((c) => c.id === invoice.clientId) : null;
 
   const handleOpen = (isOpen: boolean) => {
     if (isOpen && invoice) {
-      setScope(invoice.scope);
-      setClientId(invoice.clientId);
-      setProjectId(invoice.projectId ?? "");
       setAmount(String(invoice.amount));
       setDueDate(invoice.dueDate ? new Date(invoice.dueDate) : null);
       setNotes(invoice.notes ?? "");
       setPayments(invoice.payments);
+      setAmountWarning(false);
     } else if (isOpen) {
-      setScope("client");
-      setClientId("");
-      setProjectId("");
       setAmount("0");
       setDueDate(null);
       setNotes("");
       setPayments([]);
+      setAmountWarning(false);
     }
     onOpenChange(isOpen);
   };
 
+  const handleAmountChange = (newAmount: string) => {
+    setAmount(newAmount);
+    if (selectedSale) {
+      const origAmount = invoice?.amount ?? selectedSale.totalAmount;
+      const newAmt = Number(newAmount) || 0;
+      if (newAmt !== origAmount) {
+        setAmountWarning(true);
+      } else {
+        setAmountWarning(false);
+      }
+    }
+  };
+
   const handleSavePayment = (payment: Payment) => {
-    if (editingPayment !== null) {
+    if (editingPayment !== null && editingPayment.index >= 0) {
       const updated = [...payments];
       updated[editingPayment.index] = payment;
       setPayments(updated);
@@ -167,20 +190,38 @@ const InvoiceFormDialog = ({
   };
 
   const submit = () => {
-    if (!clientId) { toast.error("Please select a client"); return; }
+    if (!client) { toast.error("Please select a client"); return; }
     const amt = Number(amount);
     if (amt <= 0) { toast.error("Valid amount is required"); return; }
+
     upsertInvoice({
       id: invoice?.id,
-      scope,
-      clientId,
-      projectId: scope === "project" && projectId ? projectId : undefined,
+      clientId: client.id,
+      saleId: invoice?.saleId ?? selectedSale?.id ?? "",
       amount: amt,
       dueDate: dueDate?.toISOString(),
       payments,
       notes: notes.trim() || undefined,
     });
-    toast.success(invoice ? "Invoice updated" : "Invoice created");
+
+    if (selectedSale && amt !== selectedSale.totalAmount) {
+      upsertSale({
+        id: selectedSale.id,
+        clientId: selectedSale.clientId,
+        clientName: selectedSale.clientName,
+        location: selectedSale.location,
+        surveyingDay: selectedSale.surveyingDay,
+        totalAmount: amt,
+        surveyType: selectedSale.surveyType,
+        assignedTeamId: selectedSale.assignedTeamId,
+        checklist: selectedSale.checklist,
+        files: selectedSale.files,
+        remarks: selectedSale.remarks,
+      });
+      toast.success("Invoice updated. Sale amount also updated.");
+    } else {
+      toast.success("Invoice updated");
+    }
     onSaved();
     handleOpen(false);
   };
@@ -189,53 +230,30 @@ const InvoiceFormDialog = ({
     <Dialog open={open} onOpenChange={handleOpen}>
       <DialogContent className="max-w-lg max-h-[90vh] flex flex-col p-0 gap-0">
         <DialogHeader className="px-6 pt-6 pb-4 border-b border-border">
-          <DialogTitle className="font-serif text-2xl">{invoice ? "Edit invoice" : "New invoice"}</DialogTitle>
+          <DialogTitle className="font-serif text-2xl">Edit invoice</DialogTitle>
         </DialogHeader>
         <div className="flex-1 overflow-y-auto px-6 py-5">
           <div className="space-y-5">
-            <div className="grid sm:grid-cols-2 gap-4">
-              <div className="space-y-1.5">
-                <Label>Scope *</Label>
-                <Select value={scope} onValueChange={(v) => { setScope(v as InvoiceScope); setProjectId(""); if (v === "project") setAmount("0"); }}>
-                  <SelectTrigger><SelectValue /></SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="client">Per Client</SelectItem>
-                    <SelectItem value="project">Per Project</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="space-y-1.5">
-                <Label>Client *</Label>
-                <Select value={clientId} onValueChange={(v) => { setClientId(v); setProjectId(""); setAmount("0"); }}>
-                  <SelectTrigger><SelectValue placeholder="Select client" /></SelectTrigger>
-                  <SelectContent>
-                    {clients.length === 0 && <p className="text-xs text-muted-foreground p-2">No clients yet.</p>}
-                    {clients.map((c) => <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>)}
-                  </SelectContent>
-                </Select>
-              </div>
+            <div className="bg-accent/10 border border-accent/20 rounded-sm p-3 text-sm">
+              <p className="text-foreground/80">This invoice was created from a Sale. Client and scope cannot be changed.</p>
             </div>
 
-            {scope === "project" && (
+            <div className="grid sm:grid-cols-2 gap-4">
               <div className="space-y-1.5">
-                <Label>Project *</Label>
-                <Select value={projectId} onValueChange={(v) => {
-                  setProjectId(v);
-                  const proj = projects.find((p) => p.id === v);
-                  if (proj) setAmount(String(proj.totalAmount));
-                }}>
-                  <SelectTrigger><SelectValue placeholder="Select project" /></SelectTrigger>
-                  <SelectContent>
-                    {projects.filter((p) => p.clientId === clientId).length === 0 && (
-                      <p className="text-xs text-muted-foreground p-2">No projects for this client.</p>
-                    )}
-                    {projects.filter((p) => p.clientId === clientId).map((p) => (
-                      <SelectItem key={p.id} value={p.id}>{p.title} — {peso(p.totalAmount)}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                <Label>Client</Label>
+                <div className="h-10 flex items-center px-3 rounded-md border border-input bg-muted/40 text-sm">
+                  {client?.name ?? "—"}
+                </div>
               </div>
-            )}
+              {selectedSale && (
+                <div className="space-y-1.5">
+                  <Label>Sale</Label>
+                  <div className="h-10 flex items-center px-3 rounded-md border border-input bg-muted/40 text-sm">
+                    {selectedSale.clientName} — {peso(selectedSale.totalAmount)}
+                  </div>
+                </div>
+              )}
+            </div>
 
             <div className="grid sm:grid-cols-2 gap-4">
               <div className="space-y-1.5">
@@ -246,7 +264,7 @@ const InvoiceFormDialog = ({
                   min={0}
                   step="0.01"
                   value={amount}
-                  onChange={(e) => setAmount(e.target.value)}
+                  onChange={(e) => handleAmountChange(e.target.value)}
                   onFocus={(e) => { if (e.target.value === "0") setAmount(""); e.target.select(); }}
                   onBlur={(e) => { if (e.target.value === "") setAmount("0"); }}
                 />
@@ -267,11 +285,19 @@ const InvoiceFormDialog = ({
               </div>
             </div>
 
+            {amountWarning && (
+              <div className="bg-destructive/10 border border-destructive/20 rounded-sm p-3">
+                <p className="text-sm text-destructive">
+                  Warning: Changing the amount will also update the Sale's total amount to {peso(Number(amount) || 0)}.
+                </p>
+              </div>
+            )}
+
             <div>
               <div className="flex items-center justify-between mb-3">
                 <Label>Payments ({payments.length})</Label>
                 <Button variant="outline" size="sm" onClick={() => { setEditingPayment(null); setPaymentDialogOpen(true); }} className="gap-1 h-8">
-                  <Plus className="h-3 w-3" /> Record payment
+                  <PlusCircle className="h-3 w-3" /> Record payment
                 </Button>
               </div>
               {payments.length === 0 ? (
@@ -314,7 +340,7 @@ const InvoiceFormDialog = ({
         </div>
         <DialogFooter className="px-6 py-4 border-t border-border">
           <Button variant="outline" onClick={() => handleOpen(false)}>Cancel</Button>
-          <Button onClick={submit}>{invoice ? "Save changes" : "Create invoice"}</Button>
+          <Button onClick={submit}>Save changes</Button>
         </DialogFooter>
       </DialogContent>
 
@@ -359,12 +385,83 @@ const DeleteBtn = ({ onConfirm }: { onConfirm: () => void }) => (
   </AlertDialog>
 );
 
+const downloadInvoicePdf = (inv: Invoice, sale: ReturnType<typeof listSales>[0] | undefined, client: ReturnType<typeof listClients>[0] | undefined) => {
+  const doc = new jsPDF();
+  const pesoFmt = (n: number) => `₱${n.toLocaleString("en-PH", { minimumFractionDigits: 2 })}`;
+  const paid = inv.payments.reduce((s, p) => s + p.amount, 0);
+
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(18);
+  doc.text("INVOICE", 14, 22);
+  doc.setFontSize(11);
+  doc.setFont("helvetica", "normal");
+  doc.text(inv.invoiceNumber, 14, 30);
+
+  doc.setFontSize(9);
+  doc.setTextColor(100);
+  doc.text(`Date: ${format(new Date(inv.createdAt), "MMMM d, yyyy")}`, 14, 40);
+  if (inv.dueDate) doc.text(`Due: ${format(new Date(inv.dueDate), "MMMM d, yyyy")}`, 14, 45);
+  doc.setTextColor(0);
+
+  doc.setFontSize(10);
+  doc.text(`Client: ${client?.name ?? "—"}`, 14, 55);
+  if (sale) doc.text(`Sale: ${sale.clientName}`, 14, 61);
+
+  autoTable(doc, {
+    startY: 68,
+    head: [["Description", "Amount (PHP)"]],
+    body: [
+      ["Total Amount", pesoFmt(inv.amount)],
+      ["Amount Paid", pesoFmt(paid)],
+      ["Balance Due", pesoFmt(Math.max(0, inv.amount - paid))],
+    ],
+    theme: "striped",
+    headStyles: { fillColor: [27, 67, 50] },
+    columnStyles: { 1: { halign: "right" } },
+    margin: { left: 14, right: 14 },
+  });
+
+  if (inv.payments.length > 0) {
+    autoTable(doc, {
+      startY: (doc as any).lastAutoTable.finalY + 10,
+      head: [["Date", "Method", "Reference", "Amount (PHP)"]],
+      body: inv.payments.map((p) => [
+        format(new Date(p.date), "MMM d, yyyy"),
+        p.method,
+        p.reference ?? "—",
+        pesoFmt(p.amount),
+      ]),
+      theme: "grid",
+      headStyles: { fillColor: [27, 67, 50] },
+      columnStyles: { 3: { halign: "right" } },
+      margin: { left: 14, right: 14 },
+    });
+  }
+
+  if (inv.notes) {
+    const notesY = (doc as any).lastAutoTable?.finalY + 10 ?? 150;
+    doc.setFontSize(9);
+    doc.setTextColor(100);
+    doc.text("Notes:", 14, notesY);
+    doc.setTextColor(0);
+    doc.setFontSize(10);
+    const lines = doc.splitTextToSize(inv.notes, 182);
+    doc.text(lines, 14, notesY + 5);
+  }
+
+  doc.save(`Invoice_${inv.invoiceNumber}.pdf`);
+};
+
 const AdminBilling = () => {
   const [version, setVersion] = useState(0);
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
-  const [scopeFilter, setScopeFilter] = useState("all");
   const [page, setPage] = useState(1);
+  const [pageSize] = useState(10);
+  const [range, setRange] = useState<DateRange>({
+    from: startOfMonth(new Date()),
+    to: endOfMonth(new Date()),
+  });
   const [editing, setEditing] = useState<Invoice | null>(null);
   const [open, setOpen] = useState(false);
 
@@ -372,50 +469,114 @@ const AdminBilling = () => {
 
   const all = listInvoices();
   const clients = listClients();
-  const projects = listProjects();
+  const sales = listSales();
 
-  const filtered = all.filter((inv) => {
-    const q = search.toLowerCase();
-    const client = clients.find((c) => c.id === inv.clientId);
-    const project = inv.projectId ? projects.find((p) => p.id === inv.projectId) : null;
-    const matchSearch =
-      inv.invoiceNumber.toLowerCase().includes(q) ||
-      (client?.name ?? "").toLowerCase().includes(q) ||
-      (project?.title ?? "").toLowerCase().includes(q);
-    const matchStatus = statusFilter === "all" || inv.status === statusFilter;
-    const matchScope = scopeFilter === "all" || inv.scope === scopeFilter;
-    return matchSearch && matchStatus && matchScope;
-  });
+  const interval = useMemo(() => ({
+    start: startOfDay(range.from ?? new Date()),
+    end: endOfDay(range.to ?? range.from ?? new Date()),
+  }), [range]);
 
-  const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
+  const filtered = useMemo(() => {
+    return all.filter((inv) => {
+      const q = search.toLowerCase();
+      const client = clients.find((c) => c.id === inv.clientId);
+      const sale = inv.saleId ? sales.find((s) => s.id === inv.saleId) : null;
+      const matchSearch =
+        inv.invoiceNumber.toLowerCase().includes(q) ||
+        (client?.name ?? "").toLowerCase().includes(q) ||
+        (sale?.clientName ?? "").toLowerCase().includes(q);
+      const matchStatus = statusFilter === "all" || inv.status === statusFilter;
+      const matchDate = isWithinInterval(new Date(inv.createdAt), interval);
+      return matchSearch && matchStatus && matchDate;
+    });
+  }, [all, clients, sales, search, statusFilter, interval]);
+
+  const totalPages = Math.max(1, Math.ceil(filtered.length / pageSize));
   const pageSafe = Math.min(page, totalPages);
-  const paginated = filtered.slice((pageSafe - 1) * PAGE_SIZE, pageSafe * PAGE_SIZE);
+  const paginated = filtered.slice((pageSafe - 1) * pageSize, pageSafe * pageSize);
 
   const totalPaid = (inv: Invoice) => inv.payments.reduce((s, p) => s + p.amount, 0);
+
+  const activePresetLabel = useMemo(() => {
+    if (!range.from || !range.to) return null;
+    for (const p of PRESETS) {
+      const r = p.getRange();
+      if (
+        startOfDay(r.from).getTime() === startOfDay(range.from).getTime() &&
+        endOfDay(r.to).getTime() === endOfDay(range.to).getTime()
+      ) return p.label;
+    }
+    return null;
+  }, [range]);
+
+  const rangeLabel = range.from
+    ? range.to && startOfDay(range.to).getTime() !== startOfDay(range.from).getTime()
+      ? `${format(range.from, "MMM d, yyyy")} – ${format(range.to, "MMM d, yyyy")}`
+      : format(range.from, "MMM d, yyyy")
+    : "Pick a range";
 
   return (
     <div className="space-y-6">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <h1 className="font-serif text-3xl text-foreground">Billing</h1>
-          <p className="text-sm text-muted-foreground mt-1">Create and track invoices for clients and projects.</p>
+          <p className="text-sm text-muted-foreground mt-1">View and manage invoices. Invoices are created from Sales.</p>
         </div>
-        <Button onClick={() => { setEditing(null); setOpen(true); }} className="gap-2">
-          <Plus className="h-4 w-4" /> New invoice
-        </Button>
       </div>
-
-      <Card className="p-4">
-        <div className="flex flex-col sm:flex-row gap-3 mb-4">
-          <div className="relative flex-1">
+      <div className="flex flex-col sm:flex-row gap-3 mb-4">
+          <div className="relative flex-1 max-w-sm">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
-              placeholder="Search invoice #, client, project…"
+              placeholder="Search invoice #, client…"
               value={search}
               onChange={(e) => { setSearch(e.target.value); setPage(1); }}
               className="pl-9"
             />
           </div>
+          <Popover>
+            <PopoverTrigger asChild>
+              <Button variant="outline" className="gap-3 justify-start min-w-[260px] h-10 px-4">
+                <CalendarIcon className="h-4 w-4 text-primary shrink-0" />
+                <div className="flex flex-col items-start leading-tight">
+                  <span className="text-[10px] uppercase tracking-wider text-muted-foreground">{activePresetLabel ?? "Custom range"}</span>
+                  <span className="text-sm font-medium truncate">{rangeLabel}</span>
+                </div>
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-auto p-0 max-w-[calc(100vw-2rem)]" align="end">
+              <div className="flex flex-col sm:flex-row">
+                <div className="border-b sm:border-b-0 sm:border-r border-border p-2 flex sm:flex-col gap-1 overflow-x-auto sm:overflow-visible sm:min-w-[150px] bg-muted/30">
+                  <div className="hidden sm:block text-[10px] uppercase tracking-wider text-muted-foreground px-3 pt-2 pb-1">Quick select</div>
+                  {PRESETS.map((p) => {
+                    const isActive = activePresetLabel === p.label;
+                    return (
+                      <button
+                        key={p.label}
+                        onClick={() => setRange(p.getRange())}
+                        className={cn(
+                          "text-left text-sm px-3 py-1.5 rounded-sm whitespace-nowrap transition-colors",
+                          isActive
+                            ? "bg-primary text-primary-foreground"
+                            : "text-foreground/80 hover:bg-secondary hover:text-foreground"
+                        )}
+                      >
+                        {p.label}
+                      </button>
+                    );
+                  })}
+                </div>
+                <Calendar
+                  mode="range"
+                  selected={range}
+                  onSelect={(r) => r && setRange(r)}
+                  numberOfMonths={1}
+                  defaultMonth={range.from}
+                  initialFocus
+                  className={cn("p-3 pointer-events-auto")}
+                />
+              </div>
+            </PopoverContent>
+          </Popover>
           <select
             className="h-10 px-3 rounded-md border border-input bg-background text-sm"
             value={statusFilter}
@@ -427,16 +588,10 @@ const AdminBilling = () => {
             <option value="Paid">Paid</option>
             <option value="Overdue">Overdue</option>
           </select>
-          <select
-            className="h-10 px-3 rounded-md border border-input bg-background text-sm"
-            value={scopeFilter}
-            onChange={(e) => { setScopeFilter(e.target.value); setPage(1); }}
-          >
-            <option value="all">All scopes</option>
-            <option value="client">Per Client</option>
-            <option value="project">Per Project</option>
-          </select>
         </div>
+
+      <Card className="p-4">
+        
 
         <div className="hidden md:block overflow-x-auto">
           <table className="w-full text-sm" key={version}>
@@ -444,8 +599,7 @@ const AdminBilling = () => {
               <tr className="text-left text-xs uppercase tracking-wider text-muted-foreground border-b border-border">
                 <th className="py-3 px-2 font-medium">Invoice #</th>
                 <th className="py-3 px-2 font-medium">Client</th>
-                <th className="py-3 px-2 font-medium">Project</th>
-                <th className="py-3 px-2 font-medium">Scope</th>
+                <th className="py-3 px-2 font-medium">Sale</th>
                 <th className="py-3 px-2 font-medium text-right">Amount</th>
                 <th className="py-3 px-2 font-medium text-right">Paid</th>
                 <th className="py-3 px-2 font-medium">Status</th>
@@ -455,25 +609,33 @@ const AdminBilling = () => {
             <tbody>
               {paginated.map((inv) => {
                 const client = clients.find((c) => c.id === inv.clientId);
-                const project = inv.projectId ? projects.find((p) => p.id === inv.projectId) : null;
+                const sale = inv.saleId ? sales.find((s) => s.id === inv.saleId) : null;
                 const paid = totalPaid(inv);
                 return (
                   <tr key={inv.id} className="border-b border-border/60 hover:bg-secondary/40 transition-colors">
                     <td className="py-3 px-2">
-                      <div className="flex items-center gap-2">
-                        <FileText className="h-4 w-4 text-primary shrink-0" />
-                        <div>
-                          <div className="font-medium text-foreground">{inv.invoiceNumber}</div>
-                          <div className="text-xs text-muted-foreground">{format(new Date(inv.createdAt), "MMM d, yyyy")}</div>
+                      {inv.saleId ? (
+                        <Link to={`/ranola-admin/sales/${inv.saleId}`} className="flex items-center gap-2 hover:text-primary">
+                          <FileText className="h-4 w-4 text-primary shrink-0" />
+                          <div>
+                            <div className="font-medium text-foreground hover:underline">{inv.invoiceNumber}</div>
+                            <div className="text-xs text-muted-foreground">{format(new Date(inv.createdAt), "MMM d, yyyy")}</div>
+                          </div>
+                        </Link>
+                      ) : (
+                        <div className="flex items-center gap-2">
+                          <FileText className="h-4 w-4 text-primary shrink-0" />
+                          <div>
+                            <div className="font-medium text-foreground">{inv.invoiceNumber}</div>
+                            <div className="text-xs text-muted-foreground">{format(new Date(inv.createdAt), "MMM d, yyyy")}</div>
+                          </div>
                         </div>
-                      </div>
+                      )}
                     </td>
                     <td className="py-3 px-2 text-muted-foreground text-xs">{client?.name ?? "—"}</td>
                     <td className="py-3 px-2 text-muted-foreground text-xs">
-                      {project ? <span title={project.title} className="truncate max-w-[150px] block">{project.title}</span> : <span className="italic text-muted-foreground/50">—</span>}
-                    </td>
-                    <td className="py-3 px-2 text-xs">
-                      <Badge variant="secondary">{inv.scope === "client" ? "Client" : "Project"}</Badge>
+                      {sale ? <span className="truncate max-w-[150px] block">{sale.clientName}</span> :
+                       <span className="italic text-muted-foreground/50">—</span>}
                     </td>
                     <td className="py-3 px-2 text-right">{peso(inv.amount)}</td>
                     <td className="py-3 px-2 text-right">
@@ -484,8 +646,8 @@ const AdminBilling = () => {
                     </td>
                     <td className="py-3 px-2 text-right">
                       <div className="inline-flex gap-1">
-                        <Button variant="ghost" size="icon" onClick={() => { setEditing(inv); setOpen(true); }}>
-                          <Pencil className="h-4 w-4" />
+                        <Button variant="ghost" size="icon" onClick={() => downloadInvoicePdf(inv, sale, client)}>
+                          <Download className="h-4 w-4" />
                         </Button>
                         <DeleteBtn onConfirm={() => { deleteInvoice(inv.id); toast.success("Invoice deleted"); refresh(); }} />
                       </div>
@@ -494,50 +656,51 @@ const AdminBilling = () => {
                 );
               })}
               {paginated.length === 0 && (
-                <tr><td colSpan={8} className="py-12 text-center text-muted-foreground text-sm">
-                  {search || statusFilter !== "all" || scopeFilter !== "all" ? "No invoices match your filters" : "No invoices yet. Create your first invoice."}
+                <tr><td colSpan={7} className="py-12 text-center text-muted-foreground text-sm">
+                  {search || statusFilter !== "all" ? "No invoices match your filters" : "No invoices yet. Create invoices from Sales."}
                 </td></tr>
               )}
             </tbody>
           </table>
         </div>
 
-        {filtered.length > PAGE_SIZE && (
-          <div className="flex items-center justify-between mt-4 pt-4 border-t border-border">
-            <span className="text-xs text-muted-foreground">
-              Showing {(pageSafe - 1) * PAGE_SIZE + 1}–{Math.min(pageSafe * PAGE_SIZE, filtered.length)} of {filtered.length}
-            </span>
-            <div className="flex gap-1">
-              <Button variant="outline" size="sm" onClick={() => setPage(1)} disabled={pageSafe === 1}>«</Button>
-              <Button variant="outline" size="sm" onClick={() => setPage((p) => Math.max(1, p - 1))} disabled={pageSafe === 1}>‹</Button>
-              <span className="flex items-center px-3 text-sm text-muted-foreground">Page {pageSafe} of {totalPages}</span>
-              <Button variant="outline" size="sm" onClick={() => setPage((p) => Math.min(totalPages, p + 1))} disabled={pageSafe === totalPages}>›</Button>
-              <Button variant="outline" size="sm" onClick={() => setPage(totalPages)} disabled={pageSafe === totalPages}>»</Button>
-            </div>
+        {totalPages > 1 && (
+          <div className="flex items-center justify-center gap-4 mt-4 pt-4 border-t border-border">
+            <Button variant="outline" size="icon" onClick={() => setPage((p) => Math.max(1, p - 1))} disabled={pageSafe === 1}>
+              <ChevronLeft className="h-4 w-4" />
+            </Button>
+            <span className="text-sm text-muted-foreground">Page {pageSafe} of {totalPages}</span>
+            <Button variant="outline" size="icon" onClick={() => setPage((p) => Math.min(totalPages, p + 1))} disabled={pageSafe === totalPages}>
+              <ChevronRight className="h-4 w-4" />
+            </Button>
           </div>
         )}
 
         <div className="md:hidden space-y-3 mt-4">
           {paginated.map((inv) => {
             const client = clients.find((c) => c.id === inv.clientId);
-            const project = inv.projectId ? projects.find((p) => p.id === inv.projectId) : null;
+            const sale = inv.saleId ? sales.find((s) => s.id === inv.saleId) : null;
             const paid = totalPaid(inv);
             return (
               <div key={inv.id} className="border border-border rounded-sm p-4 bg-card">
                 <div className="flex items-start justify-between mb-2">
-                  <div>
+                  {inv.saleId ? (
+                    <Link to={`/ranola-admin/sales/${inv.saleId}`} className="font-medium text-foreground hover:text-primary">
+                      {inv.invoiceNumber}
+                    </Link>
+                  ) : (
                     <div className="font-medium text-foreground">{inv.invoiceNumber}</div>
-                    <div className="text-xs text-muted-foreground">{client?.name ?? "—"}</div>
-                  </div>
+                  )}
                   <Badge variant="outline" className={statusVariant(inv.status)}>{inv.status}</Badge>
                 </div>
-                {project && <div className="text-xs text-muted-foreground mb-1">{project.title}</div>}
+                <div className="text-xs text-muted-foreground">{client?.name ?? "—"}</div>
+                {sale && <div className="text-xs text-muted-foreground mb-1">{sale.clientName}</div>}
                 <div className="text-xs text-muted-foreground mb-3">
                   {peso(paid)} paid / {peso(inv.amount)}
                 </div>
                 <div className="flex gap-1 justify-end">
-                  <Button variant="ghost" size="icon" onClick={() => { setEditing(inv); setOpen(true); }}>
-                    <Pencil className="h-4 w-4" />
+                  <Button variant="ghost" size="icon" onClick={() => downloadInvoicePdf(inv, sale, client)}>
+                    <Download className="h-4 w-4" />
                   </Button>
                   <DeleteBtn onConfirm={() => { deleteInvoice(inv.id); toast.success("Invoice deleted"); refresh(); }} />
                 </div>
@@ -546,7 +709,7 @@ const AdminBilling = () => {
           })}
           {paginated.length === 0 && (
             <p className="py-8 text-center text-muted-foreground text-sm">
-              {search || statusFilter !== "all" || scopeFilter !== "all" ? "No invoices found" : "No invoices yet."}
+              {search || statusFilter !== "all" ? "No invoices found" : "No invoices yet."}
             </p>
           )}
         </div>

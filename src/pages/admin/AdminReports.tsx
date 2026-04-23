@@ -8,11 +8,14 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
-import { listSales, listExpenses } from "@/lib/adminStore";
+import { listSales, listExpenses, listInvoices } from "@/lib/adminStore";
 import { cn } from "@/lib/utils";
 import type { DateRange } from "react-day-picker";
 
 const peso = (n: number) => `₱${n.toLocaleString("en-PH", { minimumFractionDigits: 2 })}`;
+
+const getSalePaid = (saleId: string, invoices: ReturnType<typeof listInvoices>) =>
+  invoices.find(i => i.saleId === saleId)?.payments.reduce((sum, p) => sum + p.amount, 0) ?? 0;
 
 type Preset = { label: string; getRange: () => { from: Date; to: Date } };
 
@@ -39,7 +42,11 @@ const AdminReports = () => {
 
   const sales = listSales().filter((s) => isWithinInterval(new Date(s.surveyingDay), interval));
   const expenses = listExpenses().filter((e) => isWithinInterval(new Date(e.date), interval));
-  const revenue = sales.reduce((a, s) => a + s.paidAmount, 0);
+  const invoices = listInvoices();
+  const revenue = sales.reduce((a, s) => {
+    const inv = invoices.find(i => i.saleId === s.id);
+    return a + (inv ? inv.payments.reduce((sum, p) => sum + p.amount, 0) : 0);
+  }, 0);
   const expenseTotal = expenses.reduce((a, e) => a + e.amount, 0);
   const profit = revenue - expenseTotal;
 
@@ -95,7 +102,7 @@ const AdminReports = () => {
 
     autoTable(doc, {
       head: [["Date", "Client", "Total", "Paid", "Status"]],
-      body: sales.map((s) => [format(new Date(s.surveyingDay), "MMM d, yyyy"), s.clientName, peso(s.totalAmount), peso(s.paidAmount), s.status]),
+      body: sales.map((s) => [format(new Date(s.surveyingDay), "MMM d, yyyy"), s.clientName, peso(s.totalAmount), peso(getSalePaid(s.id, invoices)), s.status]),
       theme: "grid",
       headStyles: { fillColor: [27, 67, 50] },
       didDrawPage: (d) => { doc.text("Sales", 14, (d.cursor?.y ?? 30) - 4); },
@@ -137,8 +144,8 @@ const AdminReports = () => {
       Date: format(new Date(s.surveyingDay), "yyyy-MM-dd"),
       Client: s.clientName,
       Total: s.totalAmount,
-      Paid: s.paidAmount,
-      Balance: Math.max(0, s.totalAmount - s.paidAmount),
+      Paid: getSalePaid(s.id, invoices),
+      Balance: Math.max(0, s.totalAmount - getSalePaid(s.id, invoices)),
       Status: s.status,
     })));
     XLSX.utils.book_append_sheet(wb, ws2, "Sales");
@@ -256,7 +263,7 @@ const AdminReports = () => {
                   <td className="py-2 px-2 text-muted-foreground">{format(new Date(s.surveyingDay), "MMM d, yyyy")}</td>
                   <td className="py-2 px-2">{s.clientName}</td>
                   <td className="py-2 px-2 text-right">{peso(s.totalAmount)}</td>
-                  <td className="py-2 px-2 text-right">{peso(s.paidAmount)}</td>
+                  <td className="py-2 px-2 text-right">{peso(getSalePaid(s.id, invoices))}</td>
                   <td className="py-2 px-2 text-muted-foreground">{s.status}</td>
                 </tr>
               ))}

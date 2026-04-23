@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { Plus, Search, Pencil, Trash2, Wrench, Calendar, AlertTriangle } from "lucide-react";
+import { useState, useEffect } from "react";
+import { Plus, Search, Pencil, Trash2, Wrench, Calendar, AlertTriangle, ChevronLeft, ChevronRight } from "lucide-react";
 import { format } from "date-fns";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -113,6 +113,28 @@ const EquipmentFormDialog = ({
   const [maintenanceLogs, setMaintenanceLogs] = useState<MaintenanceLog[]>(equipment?.maintenanceLogs ?? []);
   const [logDialogOpen, setLogDialogOpen] = useState(false);
   const [editingLog, setEditingLog] = useState<{ log: MaintenanceLog | null; index: number } | null>(null);
+
+  useEffect(() => {
+    if (equipment) {
+      setName(equipment.name);
+      setType(equipment.type);
+      setSerialNumber(equipment.serialNumber ?? "");
+      setCondition(equipment.condition);
+      setAssignedTeamId(equipment.assignedTeamId ?? "__none__");
+      setLastCalibration(equipment.lastCalibration ? new Date(equipment.lastCalibration) : null);
+      setNotes(equipment.notes ?? "");
+      setMaintenanceLogs(equipment.maintenanceLogs);
+    } else {
+      setName("");
+      setType("GPS");
+      setSerialNumber("");
+      setCondition("Good");
+      setAssignedTeamId("__none__");
+      setLastCalibration(null);
+      setNotes("");
+      setMaintenanceLogs([]);
+    }
+  }, [equipment]);
 
   const handleOpen = (isOpen: boolean) => {
     if (isOpen && equipment) {
@@ -346,9 +368,8 @@ const AdminEquipment = () => {
         </Button>
       </div>
 
-      <Card className="p-4">
-        <div className="flex flex-col sm:flex-row gap-3 mb-4">
-          <div className="relative flex-1">
+      <div className="flex flex-col sm:flex-row gap-3 mb-4">
+          <div className="relative flex-1 max-w-sm">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
               placeholder="Search by name, type, serial number…"
@@ -369,6 +390,7 @@ const AdminEquipment = () => {
           </select>
         </div>
 
+      <Card className="p-4">
         <div className="hidden md:block overflow-x-auto">
           <table className="w-full text-sm" key={version}>
             <thead>
@@ -427,18 +449,15 @@ const AdminEquipment = () => {
           </table>
         </div>
 
-        {filtered.length > PAGE_SIZE && (
-          <div className="flex items-center justify-between mt-4 pt-4 border-t border-border">
-            <span className="text-xs text-muted-foreground">
-              Showing {(pageSafe - 1) * PAGE_SIZE + 1}–{Math.min(pageSafe * PAGE_SIZE, filtered.length)} of {filtered.length}
-            </span>
-            <div className="flex gap-1">
-              <Button variant="outline" size="sm" onClick={() => setPage(1)} disabled={pageSafe === 1}>«</Button>
-              <Button variant="outline" size="sm" onClick={() => setPage((p) => Math.max(1, p - 1))} disabled={pageSafe === 1}>‹</Button>
-              <span className="flex items-center px-3 text-sm text-muted-foreground">Page {pageSafe} of {totalPages}</span>
-              <Button variant="outline" size="sm" onClick={() => setPage((p) => Math.min(totalPages, p + 1))} disabled={pageSafe === totalPages}>›</Button>
-              <Button variant="outline" size="sm" onClick={() => setPage(totalPages)} disabled={pageSafe === totalPages}>»</Button>
-            </div>
+        {totalPages > 1 && (
+          <div className="flex items-center justify-center gap-4 mt-4 pt-4 border-t border-border">
+            <Button variant="outline" size="icon" onClick={() => setPage((p) => Math.max(1, p - 1))} disabled={pageSafe === 1}>
+              <ChevronLeft className="h-4 w-4" />
+            </Button>
+            <span className="text-sm text-muted-foreground">Page {pageSafe} of {totalPages}</span>
+            <Button variant="outline" size="icon" onClick={() => setPage((p) => Math.min(totalPages, p + 1))} disabled={pageSafe === totalPages}>
+              <ChevronRight className="h-4 w-4" />
+            </Button>
           </div>
         )}
 

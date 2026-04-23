@@ -21,8 +21,6 @@ import AdminSaleDetail from "./pages/admin/AdminSaleDetail";
 import AdminExpenses from "./pages/admin/AdminExpenses";
 import AdminReports from "./pages/admin/AdminReports";
 import AdminClients from "./pages/admin/AdminClients";
-import AdminProjects from "./pages/admin/AdminProjects";
-import AdminProjectDetail from "./pages/admin/AdminProjectDetail";
 import AdminTeams from "./pages/admin/AdminTeams";
 import AdminEquipment from "./pages/admin/AdminEquipment";
 import AdminBilling from "./pages/admin/AdminBilling";
@@ -55,8 +53,6 @@ const App = () => (
             <Route path="/ranola-admin/expenses" element={<AdminExpenses />} />
             <Route path="/ranola-admin/reports" element={<AdminReports />} />
             <Route path="/ranola-admin/clients" element={<AdminClients />} />
-            <Route path="/ranola-admin/projects" element={<AdminProjects />} />
-            <Route path="/ranola-admin/projects/:id" element={<AdminProjectDetail />} />
             <Route path="/ranola-admin/teams" element={<AdminTeams />} />
             <Route path="/ranola-admin/equipment" element={<AdminEquipment />} />
             <Route path="/ranola-admin/billing" element={<AdminBilling />} />

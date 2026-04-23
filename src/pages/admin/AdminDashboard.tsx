@@ -6,7 +6,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Calendar } from "@/components/ui/calendar";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
-import { listSales, listExpenses } from "@/lib/adminStore";
+import { listSales, listExpenses, listInvoices } from "@/lib/adminStore";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
 import { cn } from "@/lib/utils";
 import type { DateRange } from "react-day-picker";
@@ -38,22 +38,30 @@ const AdminDashboard = () => {
 
   const sales = listSales();
   const expenses = listExpenses();
+  const invoices = listInvoices();
 
   const filteredSales = sales.filter((s) => isWithinInterval(new Date(s.surveyingDay), interval));
   const filteredExpenses = expenses.filter((e) => isWithinInterval(new Date(e.date), interval));
 
-  const revenue = filteredSales.reduce((a, s) => a + s.paidAmount, 0);
+  const revenue = filteredSales.reduce((a, s) => {
+    const inv = invoices.find(i => i.saleId === s.id);
+    return a + (inv ? inv.payments.reduce((sum, p) => sum + p.amount, 0) : 0);
+  }, 0);
   const expenseTotal = filteredExpenses.reduce((a, e) => a + e.amount, 0);
   const profit = revenue - expenseTotal;
+
+  const getSalePaid = (saleId: string) => {
+    const inv = invoices.find(i => i.saleId === saleId);
+    return inv ? inv.payments.reduce((sum, p) => sum + p.amount, 0) : 0;
+  };
 
   const chartData = useMemo(() => {
     const spanDays = differenceInDays(interval.end, interval.start);
     if (spanDays > 90) {
-      // Group by month
       const months = eachMonthOfInterval(interval);
       return months.map((m) => {
         const mInt = { start: startOfMonth(m), end: endOfMonth(m) };
-        const rev = sales.filter((s) => isWithinInterval(new Date(s.surveyingDay), mInt)).reduce((a, s) => a + s.paidAmount, 0);
+        const rev = sales.filter((s) => isWithinInterval(new Date(s.surveyingDay), mInt)).reduce((a, s) => a + getSalePaid(s.id), 0);
         const exp = expenses.filter((e) => isWithinInterval(new Date(e.date), mInt)).reduce((a, e) => a + e.amount, 0);
         return { date: format(m, "MMM yyyy"), revenue: rev, profit: rev - exp };
       });
@@ -61,11 +69,11 @@ const AdminDashboard = () => {
     const days = eachDayOfInterval(interval);
     return days.map((d) => {
       const dayInt = { start: startOfDay(d), end: endOfDay(d) };
-      const rev = sales.filter((s) => isWithinInterval(new Date(s.surveyingDay), dayInt)).reduce((a, s) => a + s.paidAmount, 0);
+      const rev = sales.filter((s) => isWithinInterval(new Date(s.surveyingDay), dayInt)).reduce((a, s) => a + getSalePaid(s.id), 0);
       const exp = expenses.filter((e) => isWithinInterval(new Date(e.date), dayInt)).reduce((a, e) => a + e.amount, 0);
       return { date: format(d, "MMM d"), revenue: rev, profit: rev - exp };
     });
-  }, [interval, sales, expenses]);
+  }, [interval, sales, expenses, invoices]);
 
   const upcoming = useMemo(() => {
     const now = new Date();
