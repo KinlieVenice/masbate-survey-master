@@ -53,7 +53,7 @@ const Index = () => {
           <div className="max-w-3xl reveal-up">
             <div className="inline-flex items-center gap-2 mb-6 text-primary-foreground/80 text-xs uppercase tracking-[0.25em]">
               <span className="h-px w-8 bg-primary-foreground/40" />
-              Licensed Geodetic Engineering · Mobo, Masbate
+              Licensed Geodetic Engineer · Masbate
             </div>
             <h1 className="font-serif text-primary-foreground text-4xl md:text-6xl lg:text-7xl leading-[1.05] text-balance mb-6">
               The land beneath your feet,

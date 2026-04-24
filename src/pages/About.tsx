@@ -173,7 +173,7 @@ const About = () => {
         </div>
       </section>
 
-      {/* Survey Aids — dark band with overlapping portraits */}
+      {/* Survey Aides — dark band with overlapping portraits */}
       <section className="relative bg-gradient-forest text-primary-foreground overflow-hidden">
         <div
           aria-hidden
@@ -189,7 +189,7 @@ const About = () => {
                 The field
               </div>
               <h2 className="font-serif text-3xl md:text-4xl leading-tight text-balance">
-                Survey Aids.
+                Survey Aides.
               </h2>
             </div>
             <div className="md:col-span-6 md:col-start-7 self-end">
@@ -206,7 +206,7 @@ const About = () => {
               { name: "Danilo Rañola", pic: danilo },
               { name: "Nelmar Maglente", pic: nelmar },
               { name: "Christian Balag", pic: christian },
-              { name: "Jhong Gadayan", pic: jhong },
+              { name: "Danila Gadayan", pic: jhong },
               { name: "Julio Rañola", pic: julio },
             ].map((member, i) => (
               <li
@@ -229,7 +229,7 @@ const About = () => {
                   {member.name}
                 </h4>
                 <p className="text-[10px] uppercase tracking-[0.2em] text-primary-foreground/50 mt-1">
-                  Survey Aid
+                  Survey Aide
                 </p>
               </li>
             ))}
