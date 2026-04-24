@@ -40,7 +40,7 @@ const App = () => (
             <Route path="/terms" element={<Terms />} />
           </Route>
 
-          <Route path="/ranola-admin" element={<AdminLogin />} />
+          {/* <Route path="/ranola-admin" element={<AdminLogin />} />
           <Route element={<AdminLayout />}>
             <Route path="/ranola-admin/dashboard" element={<AdminDashboard />} />
             <Route path="/ranola-admin/bookings" element={<AdminBookings />} />
@@ -48,7 +48,7 @@ const App = () => (
             <Route path="/ranola-admin/sales/:id" element={<AdminSaleDetail />} />
             <Route path="/ranola-admin/expenses" element={<AdminExpenses />} />
             <Route path="/ranola-admin/reports" element={<AdminReports />} />
-          </Route>
+          </Route> */}
 
           <Route path="*" element={<NotFound />} />
         </Routes>
